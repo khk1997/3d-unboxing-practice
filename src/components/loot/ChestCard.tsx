@@ -12,13 +12,17 @@ export function ChestCard({ chest, index }: ChestCardProps) {
   const selectChest = useLootBoxStore((state) => state.selectChest);
   const [isHovered, setIsHovered] = useState(false);
   const [hasImageError, setHasImageError] = useState(false);
+  const [hasHoverImageError, setHasHoverImageError] = useState(false);
   const rotateX = useSpring(useMotionValue(0), { stiffness: 260, damping: 22 });
   const rotateY = useSpring(useMotionValue(0), { stiffness: 260, damping: 22 });
-  const shouldUseImage = Boolean(chest.imagePath && !hasImageError);
+  const shouldUseHoverImage = Boolean(isHovered && chest.hoverImagePath && !hasHoverImageError);
+  const activeImagePath = shouldUseHoverImage ? chest.hoverImagePath : chest.imagePath;
+  const shouldUseImage = Boolean(activeImagePath && !hasImageError);
 
   useEffect(() => {
     setHasImageError(false);
-  }, [chest.imagePath]);
+    setHasHoverImageError(false);
+  }, [chest.imagePath, chest.hoverImagePath]);
 
   const resetTilt = () => {
     rotateX.set(0);
@@ -93,10 +97,17 @@ export function ChestCard({ chest, index }: ChestCardProps) {
 
         {shouldUseImage ? (
           <img
-            src={chest.imagePath}
+            src={activeImagePath}
             alt={`Chest ${chest.id}`}
             draggable={false}
-            onError={() => setHasImageError(true)}
+            onError={() => {
+              if (shouldUseHoverImage) {
+                setHasHoverImageError(true);
+                return;
+              }
+
+              setHasImageError(true);
+            }}
             className="absolute inset-0 m-auto h-[82%] w-[82%] select-none object-contain drop-shadow-[0_14px_18px_rgba(0,0,0,0.42)]"
           />
         ) : (
