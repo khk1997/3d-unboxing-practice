@@ -5,12 +5,13 @@ import { useLootBoxStore } from '@/store/lootBoxStore';
 
 export function RewardModal() {
   const selectedChestId = useLootBoxStore((state) => state.selectedChestId);
-  const clearSelectedChest = useLootBoxStore((state) => state.clearSelectedChest);
+  const revealedReward = useLootBoxStore((state) => state.revealedReward);
+  const claimReward = useLootBoxStore((state) => state.claimReward);
   const selectedChest = chests.find((chest) => chest.id === selectedChestId);
 
   return (
     <AnimatePresence>
-      {selectedChest ? (
+      {selectedChest && revealedReward ? (
         <motion.div
           className="fixed inset-0 z-30 flex items-center justify-center bg-[#050302]/72 px-5 backdrop-blur-sm"
           initial={{ opacity: 0 }}
@@ -36,18 +37,18 @@ export function RewardModal() {
                 transition={{ type: 'spring', stiffness: 210, damping: 14, delay: 0.1 }}
               >
                 <div className="pointer-events-none absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#b8792f]/22 blur-3xl" />
-                <ChestModel rarity={selectedChest.rarity} />
+                <ChestModel rarity={revealedReward.rarity} />
               </motion.div>
               <h2 className="mt-5 font-display text-4xl leading-none text-[#f1ddbd] drop-shadow-[0_2px_18px_rgba(176,105,42,0.2)]">
-                {selectedChest.reward}
+                {revealedReward.name}
               </h2>
               <p className="mx-auto mt-3 max-w-[16rem] text-sm leading-6 text-[#e8d6bd]/68">
-                Chest {selectedChest.id}{' '}revealed a limited drop. Claim it to add the item to your
+                Chest {selectedChest.id} revealed a limited drop. Claim it to add the item to your
                 vault.
               </p>
               <button
                 type="button"
-                onClick={clearSelectedChest}
+                onClick={claimReward}
                 className="mt-6 h-12 w-full rounded-2xl border border-[rgba(111,74,47,0.7)] bg-[linear-gradient(180deg,#d8a24f_0%,#9b5727_100%)] text-sm font-black uppercase tracking-[0.16em] text-[#241309] shadow-[inset_0_1px_0_rgba(255,226,170,0.36),0_14px_26px_rgba(0,0,0,0.3),0_0_18px_rgba(176,105,42,0.12)] transition hover:bg-[linear-gradient(180deg,#e0ae61_0%,#aa6230_100%)] focus:outline-none focus:ring-2 focus:ring-[#c99b67]/70"
               >
                 Claim

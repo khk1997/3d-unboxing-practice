@@ -9,15 +9,22 @@ type ChestCardProps = {
 };
 
 export function ChestCard({ chest, index }: ChestCardProps) {
-  const selectChest = useLootBoxStore((state) => state.selectChest);
+  const openChest = useLootBoxStore((state) => state.openChest);
+  const canOpenChest = useLootBoxStore((state) => state.canOpenChest);
+  const openedChestIds = useLootBoxStore((state) => state.openedChestIds);
   const [isHovered, setIsHovered] = useState(false);
   const [hasImageError, setHasImageError] = useState(false);
   const [hasHoverImageError, setHasHoverImageError] = useState(false);
   const rotateX = useSpring(useMotionValue(0), { stiffness: 260, damping: 22 });
   const rotateY = useSpring(useMotionValue(0), { stiffness: 260, damping: 22 });
-  const shouldUseHoverImage = Boolean(isHovered && chest.hoverImagePath && !hasHoverImageError);
+  const isOpened = openedChestIds.includes(chest.id);
+  const shouldUseHoverImage = Boolean(
+    (isHovered || isOpened) && chest.hoverImagePath && !hasHoverImageError,
+  );
   const activeImagePath = shouldUseHoverImage ? chest.hoverImagePath : chest.imagePath;
   const shouldUseImage = Boolean(activeImagePath && !hasImageError);
+  const isOpenable = !isOpened && canOpenChest(chest);
+  const isUnavailable = !isOpened && !isOpenable;
 
   useEffect(() => {
     setHasImageError(false);
@@ -47,19 +54,26 @@ export function ChestCard({ chest, index }: ChestCardProps) {
   return (
     <motion.button
       type="button"
-      onClick={() => selectChest(chest.id)}
+      disabled={!isOpenable}
+      onClick={() => openChest(chest.id)}
       onPointerEnter={() => setIsHovered(true)}
       onPointerMove={handlePointerMove}
       onPointerLeave={resetTilt}
-      className="group relative aspect-square overflow-visible rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2 focus:ring-offset-[#070914]"
+      className={`group relative aspect-square overflow-visible rounded-2xl disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2 focus:ring-offset-[#070914] ${
+        isUnavailable ? 'opacity-45' : ''
+      }`}
       initial={{ opacity: 0, y: 18, scale: 0.92 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.38, delay: 0.18 + index * 0.035 }}
-      whileHover={{
-        y: -6,
-        scale: 1.04,
-        transition: { type: 'spring', stiffness: 340, damping: 18 },
-      }}
+      whileHover={
+        isOpenable
+          ? {
+              y: -6,
+              scale: 1.04,
+              transition: { type: 'spring', stiffness: 340, damping: 18 },
+            }
+          : undefined
+      }
       whileTap={{
         scale: 0.9,
         rotate: -1,

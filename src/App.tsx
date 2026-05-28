@@ -6,6 +6,12 @@ import { useLootBoxStore } from '@/store/lootBoxStore';
 
 export function App() {
   const selectedChestId = useLootBoxStore((state) => state.selectedChestId);
+  const gems = useLootBoxStore((state) => state.gems);
+  const freeOpenCount = useLootBoxStore((state) => state.freeOpenCount);
+  const openedCount = useLootBoxStore((state) => state.openedCount);
+  const nextMilestone = useLootBoxStore((state) => state.nextMilestone);
+  const progressTarget = nextMilestone?.opensRequired ?? Math.max(openedCount, 1);
+  const progressValue = Math.min((openedCount / progressTarget) * 100, 100);
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#080706] text-[#f0e3cf]">
@@ -36,7 +42,7 @@ export function App() {
           </div>
           <div className="rounded-full border border-[rgba(111,74,47,0.56)] bg-[#100b09]/58 px-3 py-2 text-right shadow-lg shadow-black/20 backdrop-blur">
             <p className="text-[10px] uppercase tracking-[0.18em] text-[#c0a17a]/58">Gems</p>
-            <p className="text-sm font-extrabold text-[#e5bf7a]">2,480</p>
+            <p className="text-sm font-extrabold text-[#e5bf7a]">{gems.toLocaleString()}</p>
           </div>
         </motion.div>
 
@@ -54,7 +60,7 @@ export function App() {
               <p className="mt-1 text-sm text-[#e8d6bd]/68">Tap a chest to reveal your reward.</p>
             </div>
             <span className="rounded-full border border-[rgba(111,74,47,0.55)] bg-[linear-gradient(180deg,#d8a24f_0%,#a7652d_100%)] px-3 py-1 text-xs font-black text-[#241309] shadow-[inset_0_1px_0_rgba(255,226,170,0.36),0_8px_18px_rgba(0,0,0,0.22)]">
-              1 Free
+              {freeOpenCount > 0 ? `${freeOpenCount} Free` : '300 Gems'}
             </span>
           </div>
 
@@ -62,6 +68,25 @@ export function App() {
             {chests.map((chest, index) => (
               <ChestCard key={chest.id} chest={chest} index={index} />
             ))}
+          </div>
+
+          <div className="mt-5">
+            <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-[#c0a17a]/64">
+              <span>Reward Stage</span>
+              <span>
+                {openedCount}/{progressTarget}
+              </span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full border border-[rgba(111,74,47,0.5)] bg-[#100b09]/72">
+              <motion.div
+                className="h-full rounded-full bg-[linear-gradient(90deg,#b8792f_0%,#e5bf7a_100%)]"
+                animate={{ width: `${progressValue}%` }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              />
+            </div>
+            <p className="mt-2 text-xs text-[#e8d6bd]/58">
+              Next: {nextMilestone ? nextMilestone.reward.name : 'All stage rewards claimed'}
+            </p>
           </div>
         </motion.div>
 
