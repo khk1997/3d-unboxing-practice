@@ -69,31 +69,47 @@ export function ChestCard({ chest, index }: ChestCardProps) {
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
     >
       <motion.span
-        className={`absolute -inset-3 rounded-[26px] bg-gradient-to-br ${chest.tone} blur-xl`}
+        className="absolute -inset-3 rounded-[26px] bg-[#b8792f]/30 blur-xl"
         animate={{
-          opacity: isHovered ? 0.72 : 0.28,
+          opacity: isHovered ? 0.42 : 0.08,
           scale: isHovered ? 1.12 : 1,
         }}
         transition={{ duration: 0.22 }}
       />
       <motion.span
-        className="absolute -inset-px rounded-[21px] bg-gradient-to-br from-amber-100 via-yellow-500 to-stone-950"
+        className={`absolute -inset-px rounded-[21px] ${
+          isHovered
+            ? 'bg-[linear-gradient(145deg,rgba(184,119,55,0.5),rgba(94,57,33,0.38)_48%,rgba(29,18,17,0.64)_100%)]'
+            : 'bg-[linear-gradient(145deg,rgba(90,49,25,0.34),rgba(54,31,24,0.2)_52%,rgba(16,10,10,0.34)_100%)]'
+        }`}
         animate={{
           boxShadow: isHovered
-            ? '0 20px 42px rgba(0,0,0,0.55), 0 0 42px rgba(251,191,36,0.42)'
-            : '0 16px 34px rgba(0,0,0,0.48), 0 0 28px rgba(251,191,36,0.16)',
+            ? '0 14px 30px rgba(0,0,0,0.42), 0 0 18px rgba(188,121,44,0.24)'
+            : '0 8px 18px rgba(0,0,0,0.22)',
         }}
         transition={{ duration: 0.22 }}
       />
 
       <motion.span
-        className="absolute inset-[3px] overflow-hidden rounded-[18px] bg-[linear-gradient(145deg,#33200f_0%,#171223_38%,#090b18_100%)]"
+        className={`absolute inset-px overflow-hidden rounded-[18px] ${
+          isHovered
+            ? 'bg-[radial-gradient(ellipse_at_50%_76%,rgba(174,103,36,0.24),transparent_54%),linear-gradient(145deg,rgba(48,27,24,0.72)_0%,rgba(33,20,25,0.68)_45%,rgba(12,10,12,0.72)_100%)] shadow-[inset_0_1px_0_rgba(231,187,120,0.12),inset_0_-18px_24px_rgba(0,0,0,0.36),0_10px_22px_rgba(0,0,0,0.2)]'
+            : 'bg-[radial-gradient(ellipse_at_50%_78%,rgba(139,80,32,0.15),transparent_58%),linear-gradient(145deg,rgba(38,22,21,0.46)_0%,rgba(27,18,23,0.42)_48%,rgba(10,9,11,0.46)_100%)] shadow-[inset_0_1px_0_rgba(214,168,96,0.055),inset_0_-16px_22px_rgba(0,0,0,0.26),0_8px_18px_rgba(0,0,0,0.16)]'
+        }`}
         style={{ transform: 'translateZ(18px)' }}
       >
+        <span className="absolute inset-[7px] rounded-[13px] bg-[linear-gradient(145deg,rgba(82,48,35,0.16),transparent_52%,rgba(0,0,0,0.14)_100%)]" />
+        <span className="absolute inset-0 bg-[radial-gradient(circle_at_50%_8%,rgba(185,112,49,0.045),transparent_32%),linear-gradient(135deg,rgba(168,104,50,0.035)_0%,transparent_28%,rgba(0,0,0,0.26)_76%)]" />
         <span
-          className={`absolute inset-2 rounded-[14px] bg-gradient-to-br ${chest.tone} opacity-80`}
+          className={`absolute left-1/2 top-[36%] h-[44%] w-[58%] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(208,134,57,0.18),rgba(208,134,57,0.055)_40%,transparent_72%)] blur-lg ${
+            isHovered ? 'opacity-100' : 'opacity-55'
+          }`}
         />
-        <span className="absolute inset-0 bg-[radial-gradient(circle_at_50%_12%,rgba(255,255,255,0.38),transparent_28%),linear-gradient(135deg,rgba(255,255,255,0.22)_0%,transparent_28%,rgba(0,0,0,0.34)_72%)]" />
+        <span
+          className={`absolute left-1/2 top-[66%] h-[27%] w-[72%] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(190,104,35,0.24),rgba(190,104,35,0.08)_38%,transparent_72%)] blur-md ${
+            isHovered ? 'opacity-100' : 'opacity-62'
+          }`}
+        />
 
         {shouldUseImage ? (
           <img
@@ -121,19 +137,19 @@ export function ChestCard({ chest, index }: ChestCardProps) {
           </>
         )}
 
-        <span className="absolute inset-x-3 top-3 h-4 rounded-full bg-white/30 blur-md" />
         <motion.span
-          className="absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-gradient-to-r from-transparent via-white/28 to-transparent"
+          className="absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-gradient-to-r from-transparent via-[#b8792f]/18 to-transparent"
           animate={{ x: isHovered ? '420%' : '-60%' }}
           transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
         />
-        <span className="absolute inset-0 rounded-[18px] border border-white/14" />
-        <span className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/55 to-transparent" />
+        <span
+          className={`absolute inset-0 rounded-[18px] border shadow-[inset_0_0_0_1px_rgba(25,14,11,0.34)] ${
+            isHovered ? 'border-[rgba(173,116,61,0.54)]' : 'border-[rgba(79,45,29,0.58)]'
+          }`}
+        />
+        <span className="absolute inset-x-0 bottom-0 h-1/2 bg-transparent" />
       </motion.span>
 
-      <span className="absolute bottom-2 left-1/2 rounded-full border border-amber-200/40 bg-black/42 px-2 py-0.5 -translate-x-1/2 text-[9px] font-black uppercase tracking-[0.16em] text-amber-100 shadow-lg backdrop-blur-sm">
-        Chest {chest.id}
-      </span>
     </motion.button>
   );
 }

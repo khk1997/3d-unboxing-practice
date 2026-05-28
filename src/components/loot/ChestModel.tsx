@@ -31,7 +31,7 @@ function ChestPlaceholder({ rarity }: ChestModelProps) {
     }
   });
 
-  const accentColor = rarity === 'SSR' ? '#fde047' : rarity === 'SR' ? '#67e8f9' : '#c4b5fd';
+  const accentColor = rarity === 'SSR' ? '#d8a24f' : rarity === 'SR' ? '#b8792f' : '#c2aa82';
 
   return (
     <group ref={chestRef} position={[0, 0, 0]} rotation={[0.16, -0.34, 0]}>

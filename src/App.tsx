@@ -8,7 +8,7 @@ export function App() {
   const selectedChestId = useLootBoxStore((state) => state.selectedChestId);
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#070914] text-white">
+    <main className="min-h-screen overflow-hidden bg-[#080706] text-[#f0e3cf]">
       <motion.section
         className="relative mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-6 pt-5 sm:max-w-lg"
         animate={{
@@ -17,8 +17,8 @@ export function App() {
         }}
         transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(250,204,21,0.24),transparent_34%),radial-gradient(circle_at_15%_74%,rgba(14,165,233,0.2),transparent_30%),linear-gradient(180deg,#11142a_0%,#070914_64%)]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/10 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(176,105,42,0.16),transparent_34%),radial-gradient(circle_at_22%_78%,rgba(82,40,30,0.22),transparent_32%),radial-gradient(circle_at_82%_42%,rgba(47,30,31,0.2),transparent_38%),linear-gradient(180deg,#17110f_0%,#0c0a0d_54%,#060504_100%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-[#b8792f]/10 to-transparent" />
 
         <motion.div
           className="relative z-10 flex items-center justify-between"
@@ -27,33 +27,33 @@ export function App() {
           transition={{ duration: 0.45 }}
         >
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-amber-200/80">
+            <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#b99061]/78">
               Mystic Drop
             </p>
-            <h1 className="mt-1 font-display text-3xl font-extrabold leading-none text-white">
+            <h1 className="mt-2 text-2xl font-bold uppercase leading-none tracking-[0.16em] text-[#ead8bf] drop-shadow-[0_2px_16px_rgba(176,105,42,0.16)]">
               Loot Vault
             </h1>
           </div>
-          <div className="rounded-full border border-amber-200/40 bg-black/30 px-3 py-2 text-right shadow-lg shadow-amber-500/10 backdrop-blur">
-            <p className="text-[10px] uppercase tracking-[0.18em] text-white/50">Gems</p>
-            <p className="text-sm font-extrabold text-amber-200">2,480</p>
+          <div className="rounded-full border border-[rgba(111,74,47,0.56)] bg-[#100b09]/58 px-3 py-2 text-right shadow-lg shadow-black/20 backdrop-blur">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-[#c0a17a]/58">Gems</p>
+            <p className="text-sm font-extrabold text-[#e5bf7a]">2,480</p>
           </div>
         </motion.div>
 
         <motion.div
-          className="relative z-10 mt-7 rounded-[28px] border border-white/12 bg-white/[0.06] p-4 shadow-2xl shadow-black/40 backdrop-blur-md"
+          className="relative z-10 mt-7 rounded-[28px] border border-[rgba(111,74,47,0.58)] bg-[radial-gradient(circle_at_50%_8%,rgba(176,105,42,0.11),transparent_34%),linear-gradient(180deg,rgba(37,25,22,0.7)_0%,rgba(15,12,13,0.74)_100%)] p-4 shadow-[inset_0_1px_0_rgba(170,112,56,0.12),inset_0_0_0_1px_rgba(37,24,20,0.38),0_24px_60px_rgba(0,0,0,0.42),0_0_36px_rgba(176,105,42,0.06)] backdrop-blur-md"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.12 }}
         >
           <div className="mb-4 flex items-end justify-between">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200/70">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#c99b67]/76">
                 Pick one
               </p>
-              <p className="mt-1 text-sm text-white/58">Tap a chest to reveal your reward.</p>
+              <p className="mt-1 text-sm text-[#e8d6bd]/68">Tap a chest to reveal your reward.</p>
             </div>
-            <span className="rounded-full bg-amber-300 px-3 py-1 text-xs font-black text-[#221509]">
+            <span className="rounded-full border border-[rgba(111,74,47,0.55)] bg-[linear-gradient(180deg,#d8a24f_0%,#a7652d_100%)] px-3 py-1 text-xs font-black text-[#241309] shadow-[inset_0_1px_0_rgba(255,226,170,0.36),0_8px_18px_rgba(0,0,0,0.22)]">
               1 Free
             </span>
           </div>
@@ -71,7 +71,7 @@ export function App() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.58 }}
         >
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/38">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#b99061]/48">
             Daily pull resets in 08:42
           </p>
         </motion.div>
