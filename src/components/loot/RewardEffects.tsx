@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 const burstDelay = 0.74;
 
@@ -102,9 +103,27 @@ const rewardGlints = [
   { x: 74, y: 18, rotate: -24, delay: 0.52 },
 ];
 
+function useIsMobileViewport() {
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 640px)');
+    const syncViewport = () => setIsMobileViewport(mediaQuery.matches);
+
+    syncViewport();
+    mediaQuery.addEventListener('change', syncViewport);
+
+    return () => mediaQuery.removeEventListener('change', syncViewport);
+  }, []);
+
+  return isMobileViewport;
+}
+
 // Radiance: warm radial glow and slow rotating rays behind the reward.
 function RewardRadiance() {
   const shouldReduceMotion = useReducedMotion();
+  const isMobileViewport = useIsMobileViewport();
+  const shouldLoopRays = !shouldReduceMotion && !isMobileViewport;
 
   return (
     <div className="pointer-events-none absolute inset-0 z-0 overflow-visible" aria-hidden="true">
@@ -152,12 +171,12 @@ function RewardRadiance() {
               'radial-gradient(circle, transparent 0%, black 16%, black 34%, rgba(0,0,0,0.46) 50%, transparent 68%)',
           }}
           initial={{ rotate: -10 }}
-          animate={{ rotate: shouldReduceMotion ? -10 : 350 }}
+          animate={{ rotate: shouldLoopRays ? 350 : -10 }}
           transition={{
             delay: burstDelay + 0.02,
-            duration: 18,
+            duration: shouldLoopRays ? 18 : 0.75,
             ease: 'linear',
-            repeat: shouldReduceMotion ? 0 : Infinity,
+            repeat: shouldLoopRays ? Infinity : 0,
           }}
         />
       </motion.div>
@@ -227,8 +246,14 @@ function RewardSparkles() {
             ease: [0.22, 1, 0.36, 1],
           }}
         >
-          <span className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 rounded-full bg-[#fff7cf] shadow-[0_0_10px_rgba(255,238,180,0.82)]" />
-          <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 rounded-full bg-[#fff7cf] shadow-[0_0_10px_rgba(255,238,180,0.82)]" />
+          <span className="absolute inset-[3px] rounded-full bg-[radial-gradient(circle,rgba(255,250,186,0.74)_0%,rgba(255,222,70,0.28)_34%,transparent_66%)] blur-[1px]" />
+          <span
+            className="absolute left-1/2 top-1/2 h-[58%] w-[58%] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle_at_50%_50%,#fffde6_0%,#fff27a_28%,#ffd927_56%,rgba(255,199,31,0.08)_72%,transparent_76%)] shadow-[0_0_6px_rgba(255,235,90,0.74),0_0_11px_rgba(255,201,32,0.34)]"
+            style={{
+              clipPath:
+                'polygon(50% 0%, 58% 38%, 100% 50%, 58% 62%, 50% 100%, 42% 62%, 0% 50%, 42% 38%)',
+            }}
+          />
         </motion.span>
       ))}
     </div>

@@ -17,6 +17,7 @@ const chestModelPath = '/models/chests/chest.glb';
 const lidOpenAxis = new Vector3(0, 0, 1);
 const chestShakeDuration = 0.62;
 const chestOpenDuration = 0.72;
+const chestAnimationDuration = chestShakeDuration + chestOpenDuration;
 const lidOpenAngle = 0.58;
 
 type CoinMaterial = Material & {
@@ -84,6 +85,7 @@ function ChestAsset({ rarity }: ChestModelProps) {
   const lidRef = useRef<Object3D | null>(null);
   const lidClosedQuaternionRef = useRef<Quaternion | null>(null);
   const elapsedRef = useRef(0);
+  const hasCompletedAnimationRef = useRef(false);
 
   useLayoutEffect(() => {
     model.traverse((object) => {
@@ -115,7 +117,11 @@ function ChestAsset({ rarity }: ChestModelProps) {
   }, [model, rarity]);
 
   useFrame((_, delta) => {
-    elapsedRef.current = Math.min(elapsedRef.current + delta, chestShakeDuration + chestOpenDuration);
+    if (hasCompletedAnimationRef.current) {
+      return;
+    }
+
+    elapsedRef.current = Math.min(elapsedRef.current + delta, chestAnimationDuration);
 
     const elapsed = elapsedRef.current;
     const shakeProgress = Math.min(elapsed / chestShakeDuration, 1);
@@ -149,6 +155,10 @@ function ChestAsset({ rarity }: ChestModelProps) {
       const openQuaternion = new Quaternion().setFromAxisAngle(lidOpenAxis, openProgress * lidOpenAngle);
       lidRef.current.quaternion.copy(lidClosedQuaternionRef.current).multiply(openQuaternion);
     }
+
+    if (elapsedRef.current >= chestAnimationDuration) {
+      hasCompletedAnimationRef.current = true;
+    }
   });
 
   return (
@@ -163,6 +173,7 @@ export function ChestModel({ rarity }: ChestModelProps) {
     <Canvas
       className="absolute inset-0 h-full w-full"
       camera={{ position: chestCameraView.cameraPosition, fov: 22.6 }}
+      dpr={[1, 1.5]}
       gl={{ antialias: true, alpha: true, outputColorSpace: SRGBColorSpace, toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1.18 }}
       style={{ width: '100%', height: '100%', background: 'transparent' }}
     >
