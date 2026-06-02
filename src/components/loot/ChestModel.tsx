@@ -1,64 +1,110 @@
-import { Canvas, useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
-import type { Group, Mesh } from 'three';
+import { Environment, Lightformer, useGLTF } from '@react-three/drei';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Suspense, useEffect, useMemo, useRef } from 'react';
+import { ACESFilmicToneMapping, Quaternion, SRGBColorSpace, Vector3 } from 'three';
+import type { Group, Material, Mesh, Object3D, PointLight } from 'three';
 
 type ChestModelProps = {
   rarity: string;
 };
 
-function ChestPlaceholder({ rarity }: ChestModelProps) {
+const chestCameraView = {
+  cameraPosition: [0.08, 0.54, 5.35] as [number, number, number],
+  modelRotation: [0.1, -2.08, 0] as [number, number, number],
+};
+
+const chestModelPath = '/models/chests/chest.glb';
+const lidOpenAxis = new Vector3(0, 0, 1);
+const coinLightLayer = 1;
+
+function tuneMaterial(material: Material) {
+  material.needsUpdate = true;
+
+  if ('envMapIntensity' in material) {
+    material.envMapIntensity = 1.35;
+  }
+
+  if ('toneMapped' in material) {
+    material.toneMapped = true;
+  }
+}
+
+function isCoinMesh(mesh: Mesh) {
+  const meshName = mesh.name.toLowerCase();
+  const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+
+  return (
+    meshName.includes('coin') ||
+    materials.some((material) => material?.name.toLowerCase().includes('coin'))
+  );
+}
+
+function ChestAsset({ rarity }: ChestModelProps) {
+  const { scene } = useGLTF(chestModelPath);
+  const { camera } = useThree();
+  const model = useMemo(() => scene.clone(true), [scene]);
   const chestRef = useRef<Group>(null);
-  const lidRef = useRef<Group>(null);
-  const lockRef = useRef<Mesh>(null);
+  const lidRef = useRef<Object3D | null>(null);
+  const lidClosedQuaternionRef = useRef<Quaternion | null>(null);
+  const coinLightRef = useRef<PointLight>(null);
   const progressRef = useRef(0);
+
+  useEffect(() => {
+    camera.layers.enable(coinLightLayer);
+    coinLightRef.current?.layers.set(coinLightLayer);
+
+    model.traverse((object) => {
+      if ('isMesh' in object) {
+        const mesh = object as Mesh;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+
+        const material = mesh.material;
+        if (Array.isArray(material)) {
+          material.forEach(tuneMaterial);
+        } else if (material) {
+          tuneMaterial(material);
+        }
+
+        if (isCoinMesh(mesh)) {
+          mesh.layers.enable(coinLightLayer);
+        }
+      }
+    });
+
+    const lid = model.getObjectByName('Chest_Lid');
+    lidRef.current = lid ?? null;
+    lidClosedQuaternionRef.current = lid ? lid.quaternion.clone() : null;
+  }, [camera, model]);
 
   useFrame((_, delta) => {
     progressRef.current = Math.min(progressRef.current + delta * 1.35, 1);
     const progress = 1 - Math.pow(1 - progressRef.current, 3);
 
     if (chestRef.current) {
-      chestRef.current.rotation.y = -0.34 + progress * 0.68;
-      chestRef.current.position.y = -0.08 + Math.sin(progress * Math.PI) * 0.07;
+      chestRef.current.rotation.set(...chestCameraView.modelRotation);
+      chestRef.current.position.y = -0.36 + Math.sin(progress * Math.PI) * 0.05;
     }
 
-    if (lidRef.current) {
-      lidRef.current.rotation.x = -progress * 1.05;
-    }
-
-    if (lockRef.current) {
-      const pulse = 1 + Math.sin(progress * Math.PI) * 0.12;
-      lockRef.current.scale.set(pulse, pulse, pulse);
+    if (lidRef.current && lidClosedQuaternionRef.current) {
+      const openQuaternion = new Quaternion().setFromAxisAngle(lidOpenAxis, progress * 0.58);
+      lidRef.current.quaternion.copy(lidClosedQuaternionRef.current).multiply(openQuaternion);
     }
   });
 
-  const accentColor = rarity === 'SSR' ? '#d8a24f' : rarity === 'SR' ? '#b8792f' : '#c2aa82';
+  const accentColor = rarity === 'SSR' ? '#f0bb65' : rarity === 'SR' ? '#d78a3c' : '#c2aa82';
 
   return (
-    <group ref={chestRef} position={[0, 0, 0]} rotation={[0.16, -0.34, 0]}>
-      <mesh position={[0, -0.24, 0]}>
-        <boxGeometry args={[1.65, 0.78, 1]} />
-        <meshStandardMaterial color="#8a3f16" roughness={0.5} metalness={0.2} />
-      </mesh>
-
-      <group ref={lidRef} position={[0, 0.16, -0.48]}>
-        <mesh position={[0, 0.08, 0.48]}>
-          <boxGeometry args={[1.82, 0.34, 1.14]} />
-          <meshStandardMaterial color="#b7791f" roughness={0.44} metalness={0.28} />
-        </mesh>
-      </group>
-
-      <mesh position={[0, -0.12, 0.54]}>
-        <boxGeometry args={[1.84, 0.16, 0.1]} />
-        <meshStandardMaterial color="#f6d365" roughness={0.34} metalness={0.58} />
-      </mesh>
-      <mesh position={[0, -0.24, 0.6]}>
-        <boxGeometry args={[0.2, 0.72, 0.1]} />
-        <meshStandardMaterial color="#f6d365" roughness={0.34} metalness={0.58} />
-      </mesh>
-      <mesh ref={lockRef} position={[0, -0.1, 0.67]}>
-        <boxGeometry args={[0.34, 0.32, 0.12]} />
-        <meshStandardMaterial color={accentColor} roughness={0.24} metalness={0.48} />
-      </mesh>
+    <group ref={chestRef} position={[0, 0, 0]} rotation={chestCameraView.modelRotation} scale={1.52}>
+      <pointLight
+        ref={coinLightRef}
+        color={accentColor}
+        position={[0.08, 0.54, 0.14]}
+        intensity={4.8}
+        distance={1.1}
+        decay={2.2}
+      />
+      <primitive object={model} />
     </group>
   );
 }
@@ -67,13 +113,24 @@ export function ChestModel({ rarity }: ChestModelProps) {
   return (
     <Canvas
       className="absolute inset-0 h-full w-full"
-      camera={{ position: [0, 0.28, 3.75], fov: 32 }}
-      gl={{ antialias: true, alpha: true }}
+      camera={{ position: chestCameraView.cameraPosition, fov: 22.6 }}
+      gl={{ antialias: true, alpha: true, outputColorSpace: SRGBColorSpace, toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1.18 }}
       style={{ width: '100%', height: '100%', background: 'transparent' }}
     >
-      <ambientLight intensity={1.45} />
-      <directionalLight position={[2.2, 2.4, 3]} intensity={1.55} />
-      <ChestPlaceholder rarity={rarity} />
+      <ambientLight color="#f0c59a" intensity={0.42} />
+      <directionalLight color="#ffe0a8" position={[-1.8, 2.4, 2.8]} intensity={2.35} />
+      <directionalLight color="#ffb65f" position={[1.4, 1.1, 2.2]} intensity={1.25} />
+      <directionalLight color="#8aa0ff" position={[2.8, 1.6, -2.6]} intensity={1.1} />
+      <Environment resolution={256}>
+        <Lightformer color="#fff1cf" form="rect" intensity={3.6} position={[-1.4, 1.3, 2.4]} scale={[2.4, 0.5, 1]} />
+        <Lightformer color="#ffb15c" form="rect" intensity={2.2} position={[1.4, 0.2, 1.5]} scale={[1.1, 1.4, 1]} />
+        <Lightformer color="#6f86ff" form="rect" intensity={1.4} position={[2.4, 1.2, -2.2]} scale={[1.3, 1.1, 1]} />
+      </Environment>
+      <Suspense fallback={null}>
+        <ChestAsset rarity={rarity} />
+      </Suspense>
     </Canvas>
   );
 }
+
+useGLTF.preload(chestModelPath);
