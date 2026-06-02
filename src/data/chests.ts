@@ -8,6 +8,7 @@ export type Chest = {
   rarity: string;
   imagePath?: string;
   hoverImagePath?: string;
+  openedImagePath?: string;
 };
 
 export type Reward = {
@@ -58,6 +59,7 @@ export const chests: Chest[] = [
     rarity: 'SSR',
     imagePath: '/images/chests/common-chest.png',
     hoverImagePath: '/images/chests/hover-chest.png',
+    openedImagePath: '/images/chests/hover-chest2.png',
   },
   {
     id: 2,
@@ -69,6 +71,7 @@ export const chests: Chest[] = [
     rarity: 'SR',
     imagePath: '/images/chests/common-chest.png',
     hoverImagePath: '/images/chests/hover-chest.png',
+    openedImagePath: '/images/chests/hover-chest2.png',
   },
   {
     id: 3,
@@ -80,6 +83,7 @@ export const chests: Chest[] = [
     rarity: 'SSR',
     imagePath: '/images/chests/common-chest.png',
     hoverImagePath: '/images/chests/hover-chest.png',
+    openedImagePath: '/images/chests/hover-chest2.png',
   },
   {
     id: 4,
@@ -91,6 +95,7 @@ export const chests: Chest[] = [
     rarity: 'R',
     imagePath: '/images/chests/common-chest.png',
     hoverImagePath: '/images/chests/hover-chest.png',
+    openedImagePath: '/images/chests/hover-chest2.png',
   },
   {
     id: 5,
@@ -102,6 +107,7 @@ export const chests: Chest[] = [
     rarity: 'SR',
     imagePath: '/images/chests/common-chest.png',
     hoverImagePath: '/images/chests/hover-chest.png',
+    openedImagePath: '/images/chests/hover-chest2.png',
   },
   {
     id: 6,
@@ -113,6 +119,7 @@ export const chests: Chest[] = [
     rarity: 'SSR',
     imagePath: '/images/chests/common-chest.png',
     hoverImagePath: '/images/chests/hover-chest.png',
+    openedImagePath: '/images/chests/hover-chest2.png',
   },
   {
     id: 7,
@@ -124,6 +131,7 @@ export const chests: Chest[] = [
     rarity: 'R',
     imagePath: '/images/chests/common-chest.png',
     hoverImagePath: '/images/chests/hover-chest.png',
+    openedImagePath: '/images/chests/hover-chest2.png',
   },
   {
     id: 8,
@@ -135,6 +143,7 @@ export const chests: Chest[] = [
     rarity: 'SR',
     imagePath: '/images/chests/common-chest.png',
     hoverImagePath: '/images/chests/hover-chest.png',
+    openedImagePath: '/images/chests/hover-chest2.png',
   },
   {
     id: 9,
@@ -146,5 +155,6 @@ export const chests: Chest[] = [
     rarity: 'SSR',
     imagePath: '/images/chests/common-chest.png',
     hoverImagePath: '/images/chests/hover-chest.png',
+    openedImagePath: '/images/chests/hover-chest2.png',
   },
 ];

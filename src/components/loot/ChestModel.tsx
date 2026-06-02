@@ -1,8 +1,8 @@
 import { Environment, Lightformer, useGLTF } from '@react-three/drei';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Suspense, useEffect, useMemo, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Suspense, useLayoutEffect, useMemo, useRef } from 'react';
 import { ACESFilmicToneMapping, Quaternion, SRGBColorSpace, Vector3 } from 'three';
-import type { Group, Material, Mesh, Object3D, PointLight } from 'three';
+import type { Color, Group, Material, Mesh, Object3D } from 'three';
 
 type ChestModelProps = {
   rarity: string;
@@ -15,7 +15,18 @@ const chestCameraView = {
 
 const chestModelPath = '/models/chests/chest.glb';
 const lidOpenAxis = new Vector3(0, 0, 1);
-const coinLightLayer = 1;
+const chestShakeDuration = 0.62;
+const chestOpenDuration = 0.72;
+const lidOpenAngle = 0.58;
+
+type CoinMaterial = Material & {
+  color?: Color;
+  emissive?: Color;
+  emissiveIntensity?: number;
+  envMapIntensity?: number;
+  metalness?: number;
+  roughness?: number;
+};
 
 function tuneMaterial(material: Material) {
   material.needsUpdate = true;
@@ -29,6 +40,21 @@ function tuneMaterial(material: Material) {
   }
 }
 
+function tuneCoinMaterial(material: Material, rarity: string) {
+  tuneMaterial(material);
+  const coinMaterial = material as CoinMaterial;
+  const glowIntensity = rarity === 'SSR' ? 0.22 : rarity === 'SR' ? 0.18 : 0.14;
+
+  coinMaterial.color?.set('#f3b63f');
+  coinMaterial.emissive?.set('#ffb433');
+  coinMaterial.emissiveIntensity = glowIntensity;
+
+  coinMaterial.envMapIntensity = 2.7;
+  coinMaterial.roughness = 0.18;
+  coinMaterial.metalness = 0.92;
+  coinMaterial.needsUpdate = true;
+}
+
 function isCoinMesh(mesh: Mesh) {
   const meshName = mesh.name.toLowerCase();
   const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
@@ -39,20 +65,27 @@ function isCoinMesh(mesh: Mesh) {
   );
 }
 
+function easeOutCubic(value: number) {
+  return 1 - Math.pow(1 - value, 3);
+}
+
+function burstOpenProgress(value: number) {
+  if (value <= 0.28) {
+    return easeOutCubic(value / 0.28) * 0.82;
+  }
+
+  return 0.82 + easeOutCubic((value - 0.28) / 0.72) * 0.18;
+}
+
 function ChestAsset({ rarity }: ChestModelProps) {
   const { scene } = useGLTF(chestModelPath);
-  const { camera } = useThree();
   const model = useMemo(() => scene.clone(true), [scene]);
   const chestRef = useRef<Group>(null);
   const lidRef = useRef<Object3D | null>(null);
   const lidClosedQuaternionRef = useRef<Quaternion | null>(null);
-  const coinLightRef = useRef<PointLight>(null);
-  const progressRef = useRef(0);
+  const elapsedRef = useRef(0);
 
-  useEffect(() => {
-    camera.layers.enable(coinLightLayer);
-    coinLightRef.current?.layers.set(coinLightLayer);
-
+  useLayoutEffect(() => {
     model.traverse((object) => {
       if ('isMesh' in object) {
         const mesh = object as Mesh;
@@ -67,7 +100,11 @@ function ChestAsset({ rarity }: ChestModelProps) {
         }
 
         if (isCoinMesh(mesh)) {
-          mesh.layers.enable(coinLightLayer);
+          if (Array.isArray(material)) {
+            material.forEach((item) => tuneCoinMaterial(item, rarity));
+          } else if (material) {
+            tuneCoinMaterial(material, rarity);
+          }
         }
       }
     });
@@ -75,35 +112,47 @@ function ChestAsset({ rarity }: ChestModelProps) {
     const lid = model.getObjectByName('Chest_Lid');
     lidRef.current = lid ?? null;
     lidClosedQuaternionRef.current = lid ? lid.quaternion.clone() : null;
-  }, [camera, model]);
+  }, [model, rarity]);
 
   useFrame((_, delta) => {
-    progressRef.current = Math.min(progressRef.current + delta * 1.35, 1);
-    const progress = 1 - Math.pow(1 - progressRef.current, 3);
+    elapsedRef.current = Math.min(elapsedRef.current + delta, chestShakeDuration + chestOpenDuration);
+
+    const elapsed = elapsedRef.current;
+    const shakeProgress = Math.min(elapsed / chestShakeDuration, 1);
+    const shakeEnvelope =
+      elapsed < chestShakeDuration ? Math.sin(shakeProgress * Math.PI) : 0;
+    const rawOpenProgress = Math.min(Math.max((elapsed - chestShakeDuration) / chestOpenDuration, 0), 1);
+    const openProgress = burstOpenProgress(rawOpenProgress);
+    const burstProgress = rawOpenProgress > 0 ? Math.sin(Math.min(rawOpenProgress / 0.34, 1) * Math.PI) : 0;
+    const shakeX = Math.sin(elapsed * 76) * 0.032 * shakeEnvelope;
+    const shakePitch = Math.sin(elapsed * 58) * 0.026 * shakeEnvelope;
+    const shakeRoll = Math.sin(elapsed * 88) * 0.055 * shakeEnvelope;
+    const launchLift = burstProgress * 0.075;
+    const launchPitch = burstProgress * -0.035;
+    const launchRoll = burstProgress * -0.035;
 
     if (chestRef.current) {
-      chestRef.current.rotation.set(...chestCameraView.modelRotation);
-      chestRef.current.position.y = -0.36 + Math.sin(progress * Math.PI) * 0.05;
+      chestRef.current.rotation.set(
+        chestCameraView.modelRotation[0] + shakePitch + launchPitch,
+        chestCameraView.modelRotation[1],
+        chestCameraView.modelRotation[2] + shakeRoll + launchRoll,
+      );
+      chestRef.current.position.x = shakeX;
+      chestRef.current.position.y =
+        -0.36 -
+        Math.sin(shakeProgress * Math.PI) * 0.025 +
+        Math.sin(openProgress * Math.PI) * 0.035 +
+        launchLift;
     }
 
     if (lidRef.current && lidClosedQuaternionRef.current) {
-      const openQuaternion = new Quaternion().setFromAxisAngle(lidOpenAxis, progress * 0.58);
+      const openQuaternion = new Quaternion().setFromAxisAngle(lidOpenAxis, openProgress * lidOpenAngle);
       lidRef.current.quaternion.copy(lidClosedQuaternionRef.current).multiply(openQuaternion);
     }
   });
 
-  const accentColor = rarity === 'SSR' ? '#f0bb65' : rarity === 'SR' ? '#d78a3c' : '#c2aa82';
-
   return (
     <group ref={chestRef} position={[0, 0, 0]} rotation={chestCameraView.modelRotation} scale={1.52}>
-      <pointLight
-        ref={coinLightRef}
-        color={accentColor}
-        position={[0.08, 0.54, 0.14]}
-        intensity={4.8}
-        distance={1.1}
-        decay={2.2}
-      />
       <primitive object={model} />
     </group>
   );

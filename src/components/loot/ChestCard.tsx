@@ -15,13 +15,21 @@ export function ChestCard({ chest, index }: ChestCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [hasImageError, setHasImageError] = useState(false);
   const [hasHoverImageError, setHasHoverImageError] = useState(false);
+  const [hasOpenedImageError, setHasOpenedImageError] = useState(false);
   const rotateX = useSpring(useMotionValue(0), { stiffness: 260, damping: 22 });
   const rotateY = useSpring(useMotionValue(0), { stiffness: 260, damping: 22 });
   const isOpened = openedChestIds.includes(chest.id);
-  const shouldUseHoverImage = Boolean(
-    (isHovered || isOpened) && chest.hoverImagePath && !hasHoverImageError,
+  const shouldUseOpenedImage = Boolean(
+    isOpened && chest.openedImagePath && !hasOpenedImageError,
   );
-  const activeImagePath = shouldUseHoverImage ? chest.hoverImagePath : chest.imagePath;
+  const shouldUseHoverImage = Boolean(
+    !shouldUseOpenedImage && isHovered && chest.hoverImagePath && !hasHoverImageError,
+  );
+  const activeImagePath = shouldUseOpenedImage
+    ? chest.openedImagePath
+    : shouldUseHoverImage
+      ? chest.hoverImagePath
+      : chest.imagePath;
   const shouldUseImage = Boolean(activeImagePath && !hasImageError);
   const isOpenable = !isOpened && canOpenChest(chest);
   const isUnavailable = !isOpened && !isOpenable;
@@ -29,7 +37,8 @@ export function ChestCard({ chest, index }: ChestCardProps) {
   useEffect(() => {
     setHasImageError(false);
     setHasHoverImageError(false);
-  }, [chest.imagePath, chest.hoverImagePath]);
+    setHasOpenedImageError(false);
+  }, [chest.imagePath, chest.hoverImagePath, chest.openedImagePath]);
 
   const resetTilt = () => {
     rotateX.set(0);
@@ -131,6 +140,11 @@ export function ChestCard({ chest, index }: ChestCardProps) {
             alt={`Chest ${chest.id}`}
             draggable={false}
             onError={() => {
+              if (shouldUseOpenedImage) {
+                setHasOpenedImageError(true);
+                return;
+              }
+
               if (shouldUseHoverImage) {
                 setHasHoverImageError(true);
                 return;

@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChestModel } from '@/components/loot/ChestModel';
+import { RewardEffects } from '@/components/loot/RewardEffects';
 import { chests } from '@/data/chests';
 import { useLootBoxStore } from '@/store/lootBoxStore';
 
@@ -26,26 +27,34 @@ export function RewardModal() {
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_8%,rgba(194,116,45,0.18),transparent_38%),radial-gradient(circle_at_50%_72%,rgba(98,45,25,0.18),transparent_52%)]" />
-            <div className="relative">
+
+            <div className="relative z-10">
               <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c99b67]/86">
                 Reward Unlocked
               </p>
+
               <motion.div
                 className="relative mx-auto mt-5 h-56 w-56 [&_canvas]:!h-full [&_canvas]:!w-full"
                 initial={{ rotate: -8, scale: 0.5 }}
                 animate={{ rotate: 0, scale: 1 }}
                 transition={{ type: 'spring', stiffness: 210, damping: 14, delay: 0.1 }}
               >
-                <div className="pointer-events-none absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#b8792f]/22 blur-3xl" />
-                <ChestModel rarity={revealedReward.rarity} />
+                <RewardEffects />
+
+                <div className="relative z-10 h-full w-full">
+                  <ChestModel rarity={revealedReward.rarity} />
+                </div>
               </motion.div>
+
               <h2 className="mt-5 font-display text-4xl leading-none text-[#f1ddbd] drop-shadow-[0_2px_18px_rgba(176,105,42,0.2)]">
                 {revealedReward.name}
               </h2>
+
               <p className="mx-auto mt-3 max-w-[16rem] text-sm leading-6 text-[#e8d6bd]/68">
                 Chest {selectedChest.id} revealed a limited drop. Claim it to add the item to your
                 vault.
               </p>
+
               <button
                 type="button"
                 onClick={claimReward}
