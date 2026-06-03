@@ -27,9 +27,9 @@ export type RewardMilestone = {
 };
 
 const assetPath = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
-const commonChestImagePath = assetPath('/images/chests/common-chest.png');
-const hoverChestImagePath = assetPath('/images/chests/hover-chest.png');
-const openedChestImagePath = assetPath('/images/chests/hover-chest2.png');
+const commonChestImagePath = assetPath('/images/chests/common-chest.webp');
+const hoverChestImagePath = assetPath('/images/chests/hover-chest.webp');
+const openedChestImagePath = assetPath('/images/chests/hover-chest2.webp');
 
 export const lootTables: Record<string, LootTableEntry[]> = {
   standard: [

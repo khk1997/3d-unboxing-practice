@@ -1,7 +1,7 @@
-import { Environment, Lightformer, useGLTF } from '@react-three/drei';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ACESFilmicToneMapping, Quaternion, SRGBColorSpace, Vector3 } from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { Color, Group, Material, Mesh, Object3D, Texture } from 'three';
 import type { RootState } from '@react-three/fiber';
 
@@ -75,15 +75,15 @@ function tuneMaterial(material: Material, maxAnisotropy: number) {
 function tuneCoinMaterial(material: Material, rarity: string, maxAnisotropy: number) {
   tuneMaterial(material, maxAnisotropy);
   const coinMaterial = material as CoinMaterial;
-  const glowIntensity = rarity === 'SSR' ? 0.22 : rarity === 'SR' ? 0.18 : 0.14;
+  const glowIntensity = rarity === 'SSR' ? 0.16 : rarity === 'SR' ? 0.13 : 0.1;
 
-  coinMaterial.color?.set('#f3b63f');
-  coinMaterial.emissive?.set('#ffb433');
+  coinMaterial.color?.set('#ffc45a');
+  coinMaterial.emissive?.set('#6b3205');
   coinMaterial.emissiveIntensity = glowIntensity;
 
-  coinMaterial.envMapIntensity = 2.7;
-  coinMaterial.roughness = 0.18;
-  coinMaterial.metalness = 0.92;
+  coinMaterial.envMapIntensity = 1;
+  coinMaterial.roughness = 0.14;
+  coinMaterial.metalness = 0.58;
   coinMaterial.needsUpdate = true;
 }
 
@@ -174,7 +174,7 @@ function CanvasResolutionController({ dpr }: { dpr: number }) {
 }
 
 function ChestAsset({ rarity, onAnimationComplete }: ChestAssetProps) {
-  const { scene } = useGLTF(chestModelPath);
+  const { scene } = useLoader(GLTFLoader, chestModelPath);
   const gl = useThree((state) => state.gl);
   const model = useMemo(() => scene.clone(true), [scene]);
   const maxAnisotropy = useMemo(
@@ -290,20 +290,18 @@ export function ChestModel({ rarity }: ChestModelProps) {
         outputColorSpace: SRGBColorSpace,
         powerPreference: 'default',
         toneMapping: ACESFilmicToneMapping,
-        toneMappingExposure: 1.18,
+        toneMappingExposure: 1.08,
       }}
       style={{ width: '100%', height: '100%', background: 'transparent' }}
     >
       <CanvasResolutionController dpr={dpr} />
-      <ambientLight color="#f0c59a" intensity={0.42} />
-      <directionalLight color="#ffe0a8" position={[-1.8, 2.4, 2.8]} intensity={2.35} />
-      <directionalLight color="#ffb65f" position={[1.4, 1.1, 2.2]} intensity={1.25} />
-      <directionalLight color="#8aa0ff" position={[2.8, 1.6, -2.6]} intensity={1.1} />
-      <Environment resolution={128}>
-        <Lightformer color="#fff1cf" form="rect" intensity={3.6} position={[-1.4, 1.3, 2.4]} scale={[2.4, 0.5, 1]} />
-        <Lightformer color="#ffb15c" form="rect" intensity={2.2} position={[1.4, 0.2, 1.5]} scale={[1.1, 1.4, 1]} />
-        <Lightformer color="#6f86ff" form="rect" intensity={1.4} position={[2.4, 1.2, -2.2]} scale={[1.3, 1.1, 1]} />
-      </Environment>
+      <ambientLight color="#ead9ca" intensity={0.38} />
+      <hemisphereLight color="#fff3df" groundColor="#241511" intensity={0.58} />
+      <directionalLight color="#fff0cc" position={[-1.8, 2.4, 2.8]} intensity={2.85} />
+      <directionalLight color="#f1c08a" position={[1.4, 1.1, 2.2]} intensity={0.92} />
+      <directionalLight color="#d7ddff" position={[2.8, 1.6, -2.6]} intensity={0.52} />
+      <pointLight color="#fff1cf" position={[0.08, 0.38, 1.7]} intensity={0.58} distance={3.4} />
+      <pointLight color="#ffc15c" position={[0.18, 0.72, 1.15]} intensity={0.78} distance={1.55} />
       <Suspense fallback={null}>
         <ChestAsset rarity={rarity} onAnimationComplete={() => setFrameloop('demand')} />
       </Suspense>
