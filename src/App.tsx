@@ -1,7 +1,5 @@
-import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChestCard } from '@/components/loot/ChestCard';
-import { preloadChestModel } from '@/components/loot/lazyChestModel';
 import { RewardModal } from '@/components/loot/RewardModal';
 import { chests } from '@/data/chests';
 import { useLootBoxStore } from '@/store/lootBoxStore';
@@ -14,26 +12,6 @@ export function App() {
   const nextMilestone = useLootBoxStore((state) => state.nextMilestone);
   const progressTarget = nextMilestone?.opensRequired ?? Math.max(openedCount, 1);
   const progressValue = Math.min((openedCount / progressTarget) * 100, 100);
-
-  useEffect(() => {
-    const preload = () => {
-      void preloadChestModel();
-    };
-
-    if ('requestIdleCallback' in window) {
-      const idleId = window.requestIdleCallback(preload, { timeout: 2500 });
-
-      return () => {
-        window.cancelIdleCallback(idleId);
-      };
-    }
-
-    const timerId = globalThis.setTimeout(preload, 1200);
-
-    return () => {
-      globalThis.clearTimeout(timerId);
-    };
-  }, []);
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#080706] text-[#f0e3cf]">
