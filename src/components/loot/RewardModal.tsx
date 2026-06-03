@@ -1,14 +1,9 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { LazyChestModel } from '@/components/loot/lazyChestModel';
 import { RewardEffects } from '@/components/loot/RewardEffects';
 import { chests } from '@/data/chests';
 import { useLootBoxStore } from '@/store/lootBoxStore';
-
-const LazyChestModel = lazy(() =>
-  import('@/components/loot/ChestModel').then((module) => ({ default: module.ChestModel })),
-);
-
-const rewardChestFallbackPath = `${import.meta.env.BASE_URL}images/chests/reward-chest-fallback.webp`;
 
 export function RewardModal() {
   const selectedChestId = useLootBoxStore((state) => state.selectedChestId);
@@ -53,15 +48,6 @@ export function RewardModal() {
                 <RewardEffects />
 
                 <div className="relative z-10 h-full w-full">
-                  <motion.img
-                    src={rewardChestFallbackPath}
-                    alt=""
-                    className="absolute inset-0 m-auto h-full w-full select-none object-contain drop-shadow-[0_18px_26px_rgba(0,0,0,0.42)]"
-                    draggable={false}
-                    animate={{ opacity: isChestModelReady ? 0 : 0.9 }}
-                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                  />
-
                   <motion.div
                     className="absolute inset-0"
                     animate={{ opacity: isChestModelReady ? 1 : 0 }}

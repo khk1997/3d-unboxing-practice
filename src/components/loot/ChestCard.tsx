@@ -1,5 +1,6 @@
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { PointerEvent, useEffect, useState } from 'react';
+import { preloadChestModel } from '@/components/loot/lazyChestModel';
 import type { Chest } from '@/data/chests';
 import { useLootBoxStore } from '@/store/lootBoxStore';
 
@@ -46,6 +47,12 @@ export function ChestCard({ chest, index }: ChestCardProps) {
     setIsHovered(false);
   };
 
+  const warmRewardModel = () => {
+    if (isOpenable) {
+      void preloadChestModel();
+    }
+  };
+
   const handlePointerMove = (event: PointerEvent<HTMLButtonElement>) => {
     if (event.pointerType !== 'mouse') {
       return;
@@ -64,8 +71,16 @@ export function ChestCard({ chest, index }: ChestCardProps) {
     <motion.button
       type="button"
       disabled={!isOpenable}
-      onClick={() => openChest(chest.id)}
-      onPointerEnter={() => setIsHovered(true)}
+      onClick={() => {
+        warmRewardModel();
+        openChest(chest.id);
+      }}
+      onFocus={warmRewardModel}
+      onPointerDown={warmRewardModel}
+      onPointerEnter={() => {
+        setIsHovered(true);
+        warmRewardModel();
+      }}
       onPointerMove={handlePointerMove}
       onPointerLeave={resetTilt}
       className={`group relative aspect-square overflow-visible rounded-2xl disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2 focus:ring-offset-[#070914] ${

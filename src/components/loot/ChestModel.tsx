@@ -2,6 +2,7 @@ import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ACESFilmicToneMapping, Quaternion, SRGBColorSpace, Vector3 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { chestModelPath } from '@/components/loot/chestModelConfig';
 import type { Color, Group, Material, Mesh, Object3D, Texture } from 'three';
 import type { RootState } from '@react-three/fiber';
 
@@ -19,7 +20,6 @@ const chestCameraView = {
   modelRotation: [0.1, -2.08, 0] as [number, number, number],
 };
 
-const chestModelPath = `${import.meta.env.BASE_URL}models/chests/chest.glb`;
 const lidOpenAxis = new Vector3(0, 0, 1);
 const chestShakeDuration = 0.62;
 const chestOpenDuration = 0.72;
