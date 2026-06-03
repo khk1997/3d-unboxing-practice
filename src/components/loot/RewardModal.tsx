@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { RewardEffects } from '@/components/loot/RewardEffects';
 import { chests } from '@/data/chests';
@@ -13,6 +13,11 @@ export function RewardModal() {
   const revealedReward = useLootBoxStore((state) => state.revealedReward);
   const claimReward = useLootBoxStore((state) => state.claimReward);
   const selectedChest = chests.find((chest) => chest.id === selectedChestId);
+  const [isChestModelReady, setIsChestModelReady] = useState(false);
+
+  useEffect(() => {
+    setIsChestModelReady(false);
+  }, [revealedReward?.id]);
 
   return (
     <AnimatePresence>
@@ -46,20 +51,29 @@ export function RewardModal() {
                 <RewardEffects />
 
                 <div className="relative z-10 h-full w-full">
-                  <Suspense
-                    fallback={
-                      selectedChest.imagePath ? (
-                        <img
-                          src={selectedChest.imagePath}
-                          alt=""
-                          className="absolute inset-0 m-auto h-[78%] w-[78%] select-none object-contain opacity-90 drop-shadow-[0_18px_26px_rgba(0,0,0,0.42)]"
-                          draggable={false}
-                        />
-                      ) : null
-                    }
+                  {selectedChest.imagePath ? (
+                    <motion.img
+                      src={selectedChest.imagePath}
+                      alt=""
+                      className="absolute inset-0 m-auto h-[78%] w-[78%] select-none object-contain drop-shadow-[0_18px_26px_rgba(0,0,0,0.42)]"
+                      draggable={false}
+                      animate={{ opacity: isChestModelReady ? 0 : 0.9 }}
+                      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    />
+                  ) : null}
+
+                  <motion.div
+                    className="absolute inset-0"
+                    animate={{ opacity: isChestModelReady ? 1 : 0 }}
+                    transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                   >
-                    <LazyChestModel rarity={revealedReward.rarity} />
-                  </Suspense>
+                    <Suspense fallback={null}>
+                      <LazyChestModel
+                        onReady={() => setIsChestModelReady(true)}
+                        rarity={revealedReward.rarity}
+                      />
+                    </Suspense>
+                  </motion.div>
                 </div>
               </motion.div>
 

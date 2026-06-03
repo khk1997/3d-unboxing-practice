@@ -6,6 +6,7 @@ import type { Color, Group, Material, Mesh, Object3D, Texture } from 'three';
 import type { RootState } from '@react-three/fiber';
 
 type ChestModelProps = {
+  onReady?: () => void;
   rarity: string;
 };
 
@@ -173,7 +174,7 @@ function CanvasResolutionController({ dpr }: { dpr: number }) {
   return null;
 }
 
-function ChestAsset({ rarity, onAnimationComplete }: ChestAssetProps) {
+function ChestAsset({ onReady, rarity, onAnimationComplete }: ChestAssetProps) {
   const { scene } = useLoader(GLTFLoader, chestModelPath);
   const gl = useThree((state) => state.gl);
   const model = useMemo(() => scene.clone(true), [scene]);
@@ -214,7 +215,8 @@ function ChestAsset({ rarity, onAnimationComplete }: ChestAssetProps) {
     const lid = model.getObjectByName('Chest_Lid');
     lidRef.current = lid ?? null;
     lidClosedQuaternionRef.current = lid ? lid.quaternion.clone() : null;
-  }, [maxAnisotropy, model, rarity]);
+    onReady?.();
+  }, [maxAnisotropy, model, onReady, rarity]);
 
   useFrame((state: RootState, delta) => {
     if (hasCompletedAnimationRef.current) {
@@ -270,7 +272,7 @@ function ChestAsset({ rarity, onAnimationComplete }: ChestAssetProps) {
   );
 }
 
-export function ChestModel({ rarity }: ChestModelProps) {
+export function ChestModel({ onReady, rarity }: ChestModelProps) {
   const dpr = useAdaptiveDpr();
   const [frameloop, setFrameloop] = useState<'always' | 'demand'>('always');
 
@@ -303,7 +305,11 @@ export function ChestModel({ rarity }: ChestModelProps) {
       <pointLight color="#fff1cf" position={[0.08, 0.38, 1.7]} intensity={0.58} distance={3.4} />
       <pointLight color="#ffc15c" position={[0.18, 0.72, 1.15]} intensity={0.78} distance={1.55} />
       <Suspense fallback={null}>
-        <ChestAsset rarity={rarity} onAnimationComplete={() => setFrameloop('demand')} />
+        <ChestAsset
+          onReady={onReady}
+          rarity={rarity}
+          onAnimationComplete={() => setFrameloop('demand')}
+        />
       </Suspense>
     </Canvas>
   );
