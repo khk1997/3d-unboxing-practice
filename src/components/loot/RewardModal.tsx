@@ -56,7 +56,7 @@ export function RewardModal() {
                   <motion.img
                     src={rewardChestFallbackPath}
                     alt=""
-                    className="absolute inset-0 m-auto h-[78%] w-[78%] select-none object-contain drop-shadow-[0_18px_26px_rgba(0,0,0,0.42)]"
+                    className="absolute inset-0 m-auto h-full w-full select-none object-contain drop-shadow-[0_18px_26px_rgba(0,0,0,0.42)]"
                     draggable={false}
                     animate={{ opacity: isChestModelReady ? 0 : 0.9 }}
                     transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
