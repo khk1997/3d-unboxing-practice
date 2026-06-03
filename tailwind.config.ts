@@ -12,8 +12,8 @@ export default {
         brass: '#c7a15b',
       },
       fontFamily: {
-        display: ['Fraunces', 'Georgia', 'serif'],
-        body: ['Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['Georgia', 'serif'],
+        body: ['ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         soft: '0 24px 80px rgb(16 19 20 / 0.16)',
