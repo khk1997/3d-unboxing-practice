@@ -1,8 +1,12 @@
+import { lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChestModel } from '@/components/loot/ChestModel';
 import { RewardEffects } from '@/components/loot/RewardEffects';
 import { chests } from '@/data/chests';
 import { useLootBoxStore } from '@/store/lootBoxStore';
+
+const LazyChestModel = lazy(() =>
+  import('@/components/loot/ChestModel').then((module) => ({ default: module.ChestModel })),
+);
 
 export function RewardModal() {
   const selectedChestId = useLootBoxStore((state) => state.selectedChestId);
@@ -34,7 +38,7 @@ export function RewardModal() {
               </p>
 
               <motion.div
-                className="relative mx-auto mt-5 h-56 w-56 [&_canvas]:!h-full [&_canvas]:!w-full"
+                className="relative mx-auto mt-5 h-[clamp(15rem,38vw,18rem)] w-[clamp(15rem,38vw,18rem)] [&_canvas]:!h-full [&_canvas]:!w-full"
                 initial={{ rotate: -8, scale: 0.5 }}
                 animate={{ rotate: 0, scale: 1 }}
                 transition={{ type: 'spring', stiffness: 210, damping: 14, delay: 0.1 }}
@@ -42,7 +46,20 @@ export function RewardModal() {
                 <RewardEffects />
 
                 <div className="relative z-10 h-full w-full">
-                  <ChestModel rarity={revealedReward.rarity} />
+                  <Suspense
+                    fallback={
+                      selectedChest.imagePath ? (
+                        <img
+                          src={selectedChest.imagePath}
+                          alt=""
+                          className="absolute inset-0 m-auto h-[78%] w-[78%] select-none object-contain opacity-90 drop-shadow-[0_18px_26px_rgba(0,0,0,0.42)]"
+                          draggable={false}
+                        />
+                      ) : null
+                    }
+                  >
+                    <LazyChestModel rarity={revealedReward.rarity} />
+                  </Suspense>
                 </div>
               </motion.div>
 

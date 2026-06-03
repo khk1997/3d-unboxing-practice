@@ -26,3 +26,29 @@ body {
 button {
   font: inherit;
 }
+
+.reward-rays-spin {
+  animation: reward-rays-spin 22s linear infinite;
+}
+
+@media (max-width: 640px) {
+  .reward-rays-spin {
+    animation-duration: 30s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reward-rays-spin {
+    animation: none;
+  }
+}
+
+@keyframes reward-rays-spin {
+  from {
+    transform: rotate(-10deg);
+  }
+
+  to {
+    transform: rotate(350deg);
+  }
+}

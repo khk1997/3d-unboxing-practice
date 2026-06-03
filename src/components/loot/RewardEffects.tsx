@@ -1,5 +1,4 @@
 import { motion, useReducedMotion } from 'framer-motion';
-import { useEffect, useState } from 'react';
 
 const burstDelay = 0.74;
 
@@ -103,27 +102,9 @@ const rewardGlints = [
   { x: 74, y: 18, rotate: -24, delay: 0.52 },
 ];
 
-function useIsMobileViewport() {
-  const [isMobileViewport, setIsMobileViewport] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 640px)');
-    const syncViewport = () => setIsMobileViewport(mediaQuery.matches);
-
-    syncViewport();
-    mediaQuery.addEventListener('change', syncViewport);
-
-    return () => mediaQuery.removeEventListener('change', syncViewport);
-  }, []);
-
-  return isMobileViewport;
-}
-
 // Radiance: warm radial glow and slow rotating rays behind the reward.
 function RewardRadiance() {
   const shouldReduceMotion = useReducedMotion();
-  const isMobileViewport = useIsMobileViewport();
-  const shouldLoopRays = !shouldReduceMotion && !isMobileViewport;
 
   return (
     <div className="pointer-events-none absolute inset-0 z-0 overflow-visible" aria-hidden="true">
@@ -159,8 +140,8 @@ function RewardRadiance() {
           ease: [0.22, 1, 0.36, 1],
         }}
       >
-        <motion.div
-          className="h-full w-full rounded-full blur-[0.5px] brightness-125 saturate-150"
+        <div
+          className="reward-rays-spin h-full w-full rounded-full blur-[0.5px] brightness-125 saturate-150"
           style={{
             background:
               'conic-gradient(from 8deg, transparent 0deg, rgba(255,250,220,0.72) 12deg, transparent 30deg, transparent 54deg, rgba(255,204,91,0.58) 68deg, transparent 90deg, transparent 118deg, rgba(255,250,220,0.68) 132deg, transparent 154deg, transparent 194deg, rgba(255,204,91,0.54) 214deg, transparent 238deg, transparent 290deg, rgba(255,250,220,0.64) 306deg, transparent 330deg, transparent 360deg)',
@@ -169,14 +150,6 @@ function RewardRadiance() {
               'radial-gradient(circle, transparent 0%, black 16%, black 34%, rgba(0,0,0,0.46) 50%, transparent 68%)',
             maskImage:
               'radial-gradient(circle, transparent 0%, black 16%, black 34%, rgba(0,0,0,0.46) 50%, transparent 68%)',
-          }}
-          initial={{ rotate: -10 }}
-          animate={{ rotate: shouldLoopRays ? 350 : -10 }}
-          transition={{
-            delay: burstDelay + 0.02,
-            duration: shouldLoopRays ? 18 : 0.75,
-            ease: 'linear',
-            repeat: shouldLoopRays ? Infinity : 0,
           }}
         />
       </motion.div>
@@ -309,7 +282,7 @@ function RewardConfetti() {
 export function RewardEffects() {
   return (
     <>
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#b8792f]/22 blur-3xl" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#b8792f]/22 blur-2xl" />
       <RewardRadiance />
       <RewardSparkles />
       <RewardConfetti />
