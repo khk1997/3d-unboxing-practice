@@ -26,6 +26,11 @@ export type RewardMilestone = {
   reward: Reward;
 };
 
+const assetPath = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
+const commonChestImagePath = assetPath('/images/chests/common-chest.png');
+const hoverChestImagePath = assetPath('/images/chests/hover-chest.png');
+const openedChestImagePath = assetPath('/images/chests/hover-chest2.png');
+
 export const lootTables: Record<string, LootTableEntry[]> = {
   standard: [
     { id: 'verdant-key', name: 'Verdant Key', rarity: 'R', weight: 40 },
@@ -57,9 +62,9 @@ export const chests: Chest[] = [
     lootTableId: 'standard',
     reward: 'Solar Blade',
     rarity: 'SSR',
-    imagePath: '/images/chests/common-chest.png',
-    hoverImagePath: '/images/chests/hover-chest.png',
-    openedImagePath: '/images/chests/hover-chest2.png',
+    imagePath: commonChestImagePath,
+    hoverImagePath: hoverChestImagePath,
+    openedImagePath: openedChestImagePath,
   },
   {
     id: 2,
@@ -69,9 +74,9 @@ export const chests: Chest[] = [
     lootTableId: 'standard',
     reward: 'Tide Core',
     rarity: 'SR',
-    imagePath: '/images/chests/common-chest.png',
-    hoverImagePath: '/images/chests/hover-chest.png',
-    openedImagePath: '/images/chests/hover-chest2.png',
+    imagePath: commonChestImagePath,
+    hoverImagePath: hoverChestImagePath,
+    openedImagePath: openedChestImagePath,
   },
   {
     id: 3,
@@ -81,9 +86,9 @@ export const chests: Chest[] = [
     lootTableId: 'standard',
     reward: 'Moon Charm',
     rarity: 'SSR',
-    imagePath: '/images/chests/common-chest.png',
-    hoverImagePath: '/images/chests/hover-chest.png',
-    openedImagePath: '/images/chests/hover-chest2.png',
+    imagePath: commonChestImagePath,
+    hoverImagePath: hoverChestImagePath,
+    openedImagePath: openedChestImagePath,
   },
   {
     id: 4,
@@ -93,9 +98,9 @@ export const chests: Chest[] = [
     lootTableId: 'standard',
     reward: 'Verdant Key',
     rarity: 'R',
-    imagePath: '/images/chests/common-chest.png',
-    hoverImagePath: '/images/chests/hover-chest.png',
-    openedImagePath: '/images/chests/hover-chest2.png',
+    imagePath: commonChestImagePath,
+    hoverImagePath: hoverChestImagePath,
+    openedImagePath: openedChestImagePath,
   },
   {
     id: 5,
@@ -105,9 +110,9 @@ export const chests: Chest[] = [
     lootTableId: 'standard',
     reward: 'Crimson Sigil',
     rarity: 'SR',
-    imagePath: '/images/chests/common-chest.png',
-    hoverImagePath: '/images/chests/hover-chest.png',
-    openedImagePath: '/images/chests/hover-chest2.png',
+    imagePath: commonChestImagePath,
+    hoverImagePath: hoverChestImagePath,
+    openedImagePath: openedChestImagePath,
   },
   {
     id: 6,
@@ -117,9 +122,9 @@ export const chests: Chest[] = [
     lootTableId: 'standard',
     reward: 'Starlit Orb',
     rarity: 'SSR',
-    imagePath: '/images/chests/common-chest.png',
-    hoverImagePath: '/images/chests/hover-chest.png',
-    openedImagePath: '/images/chests/hover-chest2.png',
+    imagePath: commonChestImagePath,
+    hoverImagePath: hoverChestImagePath,
+    openedImagePath: openedChestImagePath,
   },
   {
     id: 7,
@@ -129,9 +134,9 @@ export const chests: Chest[] = [
     lootTableId: 'standard',
     reward: 'Gold Ticket',
     rarity: 'R',
-    imagePath: '/images/chests/common-chest.png',
-    hoverImagePath: '/images/chests/hover-chest.png',
-    openedImagePath: '/images/chests/hover-chest2.png',
+    imagePath: commonChestImagePath,
+    hoverImagePath: hoverChestImagePath,
+    openedImagePath: openedChestImagePath,
   },
   {
     id: 8,
@@ -141,9 +146,9 @@ export const chests: Chest[] = [
     lootTableId: 'standard',
     reward: 'Aqua Rune',
     rarity: 'SR',
-    imagePath: '/images/chests/common-chest.png',
-    hoverImagePath: '/images/chests/hover-chest.png',
-    openedImagePath: '/images/chests/hover-chest2.png',
+    imagePath: commonChestImagePath,
+    hoverImagePath: hoverChestImagePath,
+    openedImagePath: openedChestImagePath,
   },
   {
     id: 9,
@@ -153,8 +158,8 @@ export const chests: Chest[] = [
     lootTableId: 'standard',
     reward: 'Nova Crown',
     rarity: 'SSR',
-    imagePath: '/images/chests/common-chest.png',
-    hoverImagePath: '/images/chests/hover-chest.png',
-    openedImagePath: '/images/chests/hover-chest2.png',
+    imagePath: commonChestImagePath,
+    hoverImagePath: hoverChestImagePath,
+    openedImagePath: openedChestImagePath,
   },
 ];

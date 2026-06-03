@@ -13,7 +13,7 @@ const chestCameraView = {
   modelRotation: [0.1, -2.08, 0] as [number, number, number],
 };
 
-const chestModelPath = '/models/chests/chest.glb';
+const chestModelPath = `${import.meta.env.BASE_URL}models/chests/chest.glb`;
 const lidOpenAxis = new Vector3(0, 0, 1);
 const chestShakeDuration = 0.62;
 const chestOpenDuration = 0.72;
