@@ -8,6 +8,8 @@ const LazyChestModel = lazy(() =>
   import('@/components/loot/ChestModel').then((module) => ({ default: module.ChestModel })),
 );
 
+const rewardChestFallbackPath = `${import.meta.env.BASE_URL}images/chests/reward-chest-fallback.webp`;
+
 export function RewardModal() {
   const selectedChestId = useLootBoxStore((state) => state.selectedChestId);
   const revealedReward = useLootBoxStore((state) => state.revealedReward);
@@ -51,16 +53,14 @@ export function RewardModal() {
                 <RewardEffects />
 
                 <div className="relative z-10 h-full w-full">
-                  {selectedChest.imagePath ? (
-                    <motion.img
-                      src={selectedChest.imagePath}
-                      alt=""
-                      className="absolute inset-0 m-auto h-[78%] w-[78%] select-none object-contain drop-shadow-[0_18px_26px_rgba(0,0,0,0.42)]"
-                      draggable={false}
-                      animate={{ opacity: isChestModelReady ? 0 : 0.9 }}
-                      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                    />
-                  ) : null}
+                  <motion.img
+                    src={rewardChestFallbackPath}
+                    alt=""
+                    className="absolute inset-0 m-auto h-[78%] w-[78%] select-none object-contain drop-shadow-[0_18px_26px_rgba(0,0,0,0.42)]"
+                    draggable={false}
+                    animate={{ opacity: isChestModelReady ? 0 : 0.9 }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                  />
 
                   <motion.div
                     className="absolute inset-0"
