@@ -1,7 +1,6 @@
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { ACESFilmicToneMapping, PMREMGenerator, Quaternion, SRGBColorSpace, Vector3 } from 'three';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { ACESFilmicToneMapping, Quaternion, SRGBColorSpace, Vector3 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { chestModelPath } from '@/components/loot/chestModelConfig';
 import type { Color, Group, Material, Mesh, Object3D, Texture } from 'three';
@@ -31,7 +30,6 @@ type CoinMaterial = Material & {
   color?: Color;
   emissive?: Color;
   emissiveIntensity?: number;
-  envMap?: Texture | null;
   envMapIntensity?: number;
   metalness?: number;
   roughness?: number;
@@ -104,7 +102,6 @@ function tuneCoinMaterial(
   material: Material,
   rarity: string,
   maxAnisotropy: number,
-  environmentMap: Texture,
 ) {
   tuneMaterial(material, maxAnisotropy);
   const coinMaterial = material as CoinMaterial;
@@ -114,7 +111,6 @@ function tuneCoinMaterial(
   coinMaterial.emissive?.set('#5f2802');
   coinMaterial.emissiveIntensity = glowIntensity;
 
-  coinMaterial.envMap = environmentMap;
   coinMaterial.envMapIntensity = 0.82;
   coinMaterial.roughness = 0.18;
   coinMaterial.metalness = 0.64;
@@ -215,16 +211,6 @@ function ChestAsset({ onReady, rarity, onAnimationComplete }: ChestAssetProps) {
   const { scene } = useLoader(GLTFLoader, chestModelPath);
   const gl = useThree((state) => state.gl);
   const model = useMemo(() => scene.clone(true), [scene]);
-  const coinEnvironmentMap = useMemo(() => {
-    const pmremGenerator = new PMREMGenerator(gl);
-    const roomEnvironment = new RoomEnvironment();
-    const environmentMap = pmremGenerator.fromScene(roomEnvironment, 0.04).texture;
-
-    roomEnvironment.dispose();
-    pmremGenerator.dispose();
-
-    return environmentMap;
-  }, [gl]);
   const maxAnisotropy = useMemo(
     () => Math.min(gl.capabilities.getMaxAnisotropy(), 4),
     [gl],
@@ -234,12 +220,6 @@ function ChestAsset({ onReady, rarity, onAnimationComplete }: ChestAssetProps) {
   const lidClosedQuaternionRef = useRef<Quaternion | null>(null);
   const elapsedRef = useRef(0);
   const hasCompletedAnimationRef = useRef(false);
-
-  useEffect(() => {
-    return () => {
-      coinEnvironmentMap.dispose();
-    };
-  }, [coinEnvironmentMap]);
 
   useLayoutEffect(() => {
     model.traverse((object) => {
@@ -266,10 +246,10 @@ function ChestAsset({ onReady, rarity, onAnimationComplete }: ChestAssetProps) {
         if (isCoinMesh(mesh)) {
           if (Array.isArray(material)) {
             material.forEach((item) =>
-              tuneCoinMaterial(item, rarity, maxAnisotropy, coinEnvironmentMap),
+              tuneCoinMaterial(item, rarity, maxAnisotropy),
             );
           } else if (material) {
-            tuneCoinMaterial(material, rarity, maxAnisotropy, coinEnvironmentMap);
+            tuneCoinMaterial(material, rarity, maxAnisotropy);
           }
         }
       }
@@ -279,7 +259,7 @@ function ChestAsset({ onReady, rarity, onAnimationComplete }: ChestAssetProps) {
     lidRef.current = lid ?? null;
     lidClosedQuaternionRef.current = lid ? lid.quaternion.clone() : null;
     onReady?.();
-  }, [coinEnvironmentMap, maxAnisotropy, model, onReady, rarity]);
+  }, [maxAnisotropy, model, onReady, rarity]);
 
   useFrame((state: RootState, delta) => {
     if (hasCompletedAnimationRef.current) {
