@@ -152,7 +152,7 @@ export function ChestCard({ chest, index }: ChestCardProps) {
         {shouldUseImage ? (
           <img
             src={activeImagePath}
-            alt={`Chest ${chest.id}`}
+            alt={`寶箱 ${chest.id}`}
             draggable={false}
             onError={() => {
               if (shouldUseOpenedImage) {

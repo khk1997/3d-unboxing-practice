@@ -6,6 +6,18 @@ import { chests } from '@/data/chests';
 import { useLootBoxStore } from '@/store/lootBoxStore';
 import type { ErrorInfo, ReactNode } from 'react';
 
+const rewardDescriptions: Record<string, string> = {
+  'air-gift-pack': '沒有任何效果，但你獲得了滿滿的空氣。',
+  'almost-jackpot': 'SSR 保底進度 +1，離大獎又近了一點。',
+  'sleeping-chest': '獲得 1 次睡醒抽：下一抽不扣寶石，但寶箱會睡 3 秒。',
+  'mystery-comfort-prize': '隨機獲得免費抽 +1 或 5折券 +1。',
+  'luck-plus-one': '下一輪 SSR 機率提升，最高可提升到 10%。',
+  'one-more-pull': '獲得 1 張 5折券：下一次付費開箱只扣 150 寶石。',
+  'boss-blessing': '獲得免費抽 +1，最多可以累積 3 次。',
+  'chieftain-prize': '太衰了，SSR 保底延後 2 抽。',
+  'daily-lucky-king': '抽中 SSR！獲得 2400 寶石，保底與 SSR 機率重置。',
+};
+
 class ChestModelErrorBoundary extends Component<
   { children: ReactNode; onModelError: () => void },
   { hasError: boolean }
@@ -31,6 +43,7 @@ class ChestModelErrorBoundary extends Component<
 
 export function RewardModal() {
   const selectedChestId = useLootBoxStore((state) => state.selectedChestId);
+  const openingState = useLootBoxStore((state) => state.openingState);
   const revealedReward = useLootBoxStore((state) => state.revealedReward);
   const claimReward = useLootBoxStore((state) => state.claimReward);
   const selectedChest = chests.find((chest) => chest.id === selectedChestId);
@@ -42,7 +55,37 @@ export function RewardModal() {
 
   return (
     <AnimatePresence>
-      {selectedChest && revealedReward ? (
+      {selectedChest && openingState === 'sleeping' ? (
+        <motion.div
+          className="fixed inset-0 z-30 flex items-center justify-center bg-[#050302]/72 px-5 backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            className="relative w-full max-w-sm overflow-hidden rounded-[30px] border border-[rgba(111,74,47,0.62)] bg-[linear-gradient(180deg,rgba(42,25,21,0.96)_0%,rgba(15,11,11,0.98)_100%)] p-6 text-center text-[#f0e3cf] shadow-[0_28px_70px_rgba(0,0,0,0.58)]"
+            initial={{ opacity: 0, y: 24, scale: 0.82 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 18, scale: 0.92 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <motion.div
+              className="mx-auto h-24 w-24 rounded-full border border-[#d8a24f]/24 bg-[radial-gradient(circle,rgba(216,162,79,0.18),transparent_62%)]"
+              animate={{ scale: [1, 1.06, 1], opacity: [0.72, 1, 0.72] }}
+              transition={{ duration: 0.72, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <p className="mt-5 text-xs font-black uppercase tracking-[0.24em] text-[#c99b67]/86">
+              寶箱睡著了
+            </p>
+            <h2 className="mt-3 font-display text-3xl font-black text-[#f1ddbd]">
+              寶箱睡醒中
+            </h2>
+            <p className="mx-auto mt-3 max-w-[15rem] text-sm leading-6 text-[#e8d6bd]/62">
+              這抽不扣寶石，但要等它醒一下。
+            </p>
+          </motion.div>
+        </motion.div>
+      ) : selectedChest && revealedReward ? (
         <motion.div
           className="fixed inset-0 z-30 flex items-center justify-center bg-[#050302]/72 px-5 backdrop-blur-sm"
           initial={{ opacity: 0 }}
@@ -60,7 +103,7 @@ export function RewardModal() {
 
             <div className="relative z-10">
               <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c99b67]/86">
-                Reward Unlocked
+                獎項解鎖
               </p>
 
               <motion.div
@@ -96,13 +139,13 @@ export function RewardModal() {
                 </div>
               </motion.div>
 
-              <h2 className="mt-5 font-display text-4xl leading-none text-[#f1ddbd] drop-shadow-[0_2px_18px_rgba(176,105,42,0.2)]">
+              <h2 className="mt-5 break-words font-display text-[clamp(2rem,9vw,2.5rem)] leading-tight text-[#f1ddbd] drop-shadow-[0_2px_18px_rgba(176,105,42,0.2)]">
                 {revealedReward.name}
               </h2>
 
               <p className="mx-auto mt-3 max-w-[16rem] text-sm leading-6 text-[#e8d6bd]/68">
-                Chest {selectedChest.id} revealed a limited drop. Claim it to add the item to your
-                vault.
+                {rewardDescriptions[revealedReward.id] ??
+                  `寶箱 ${selectedChest.id} 開出了獎項，領取後加入你的金庫。`}
               </p>
 
               <button
@@ -110,7 +153,7 @@ export function RewardModal() {
                 onClick={claimReward}
                 className="mt-6 h-12 w-full rounded-2xl border border-[rgba(111,74,47,0.7)] bg-[linear-gradient(180deg,#d8a24f_0%,#9b5727_100%)] text-sm font-black uppercase tracking-[0.16em] text-[#241309] shadow-[inset_0_1px_0_rgba(255,226,170,0.36),0_14px_26px_rgba(0,0,0,0.3),0_0_18px_rgba(176,105,42,0.12)] transition hover:bg-[linear-gradient(180deg,#e0ae61_0%,#aa6230_100%)] focus:outline-none focus:ring-2 focus:ring-[#c99b67]/70"
               >
-                Claim
+                領取
               </button>
             </div>
           </motion.div>

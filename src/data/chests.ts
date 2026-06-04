@@ -21,11 +21,6 @@ export type LootTableEntry = Reward & {
   weight: number;
 };
 
-export type RewardMilestone = {
-  opensRequired: number;
-  reward: Reward;
-};
-
 const assetPath = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
 const commonChestImagePath = assetPath('/images/chests/common-chest.webp');
 const hoverChestImagePath = assetPath('/images/chests/hover-chest.webp');
@@ -33,25 +28,17 @@ const openedChestImagePath = assetPath('/images/chests/hover-chest2.webp');
 
 export const lootTables: Record<string, LootTableEntry[]> = {
   standard: [
-    { id: 'verdant-key', name: 'Verdant Key', rarity: 'R', weight: 40 },
-    { id: 'gold-ticket', name: 'Gold Ticket', rarity: 'R', weight: 30 },
-    { id: 'tide-core', name: 'Tide Core', rarity: 'SR', weight: 16 },
-    { id: 'crimson-sigil', name: 'Crimson Sigil', rarity: 'SR', weight: 10 },
-    { id: 'solar-blade', name: 'Solar Blade', rarity: 'SSR', weight: 3 },
-    { id: 'nova-crown', name: 'Nova Crown', rarity: 'SSR', weight: 1 },
+    { id: 'air-gift-pack', name: '空氣禮包', rarity: 'R', weight: 24 },
+    { id: 'almost-jackpot', name: '差一點中大獎', rarity: 'R', weight: 18 },
+    { id: 'sleeping-chest', name: '寶箱睡著了', rarity: 'R', weight: 14 },
+    { id: 'mystery-comfort-prize', name: '神秘安慰獎', rarity: 'R', weight: 12 },
+    { id: 'luck-plus-one', name: '幸運 +1', rarity: 'SR', weight: 11 },
+    { id: 'one-more-pull', name: '下一抽5折', rarity: 'SR', weight: 9 },
+    { id: 'boss-blessing', name: '老闆的祝福', rarity: 'SR', weight: 6 },
+    { id: 'chieftain-prize', name: '非洲酋長獎', rarity: 'SR', weight: 3 },
+    { id: 'daily-lucky-king', name: '今日歐皇', rarity: 'SSR', weight: 3 },
   ],
 };
-
-export const rewardMilestones: RewardMilestone[] = [
-  {
-    opensRequired: 5,
-    reward: { id: 'aqua-rune', name: 'Aqua Rune', rarity: 'SR' },
-  },
-  {
-    opensRequired: 10,
-    reward: { id: 'moon-charm', name: 'Moon Charm', rarity: 'SSR' },
-  },
-];
 
 export const chests: Chest[] = [
   {
@@ -60,7 +47,7 @@ export const chests: Chest[] = [
     cost: 300,
     currency: 'gems',
     lootTableId: 'standard',
-    reward: 'Solar Blade',
+    reward: '今日歐皇',
     rarity: 'SSR',
     imagePath: commonChestImagePath,
     hoverImagePath: hoverChestImagePath,
@@ -72,7 +59,7 @@ export const chests: Chest[] = [
     cost: 300,
     currency: 'gems',
     lootTableId: 'standard',
-    reward: 'Tide Core',
+    reward: '老闆的祝福',
     rarity: 'SR',
     imagePath: commonChestImagePath,
     hoverImagePath: hoverChestImagePath,
@@ -84,8 +71,8 @@ export const chests: Chest[] = [
     cost: 300,
     currency: 'gems',
     lootTableId: 'standard',
-    reward: 'Moon Charm',
-    rarity: 'SSR',
+    reward: '非洲酋長獎',
+    rarity: 'SR',
     imagePath: commonChestImagePath,
     hoverImagePath: hoverChestImagePath,
     openedImagePath: openedChestImagePath,
@@ -96,7 +83,7 @@ export const chests: Chest[] = [
     cost: 300,
     currency: 'gems',
     lootTableId: 'standard',
-    reward: 'Verdant Key',
+    reward: '空氣禮包',
     rarity: 'R',
     imagePath: commonChestImagePath,
     hoverImagePath: hoverChestImagePath,
@@ -108,7 +95,7 @@ export const chests: Chest[] = [
     cost: 300,
     currency: 'gems',
     lootTableId: 'standard',
-    reward: 'Crimson Sigil',
+    reward: '幸運 +1',
     rarity: 'SR',
     imagePath: commonChestImagePath,
     hoverImagePath: hoverChestImagePath,
@@ -120,8 +107,8 @@ export const chests: Chest[] = [
     cost: 300,
     currency: 'gems',
     lootTableId: 'standard',
-    reward: 'Starlit Orb',
-    rarity: 'SSR',
+    reward: '下一抽5折',
+    rarity: 'SR',
     imagePath: commonChestImagePath,
     hoverImagePath: hoverChestImagePath,
     openedImagePath: openedChestImagePath,
@@ -132,7 +119,7 @@ export const chests: Chest[] = [
     cost: 300,
     currency: 'gems',
     lootTableId: 'standard',
-    reward: 'Gold Ticket',
+    reward: '差一點中大獎',
     rarity: 'R',
     imagePath: commonChestImagePath,
     hoverImagePath: hoverChestImagePath,
@@ -144,8 +131,8 @@ export const chests: Chest[] = [
     cost: 300,
     currency: 'gems',
     lootTableId: 'standard',
-    reward: 'Aqua Rune',
-    rarity: 'SR',
+    reward: '寶箱睡著了',
+    rarity: 'R',
     imagePath: commonChestImagePath,
     hoverImagePath: hoverChestImagePath,
     openedImagePath: openedChestImagePath,
@@ -156,8 +143,8 @@ export const chests: Chest[] = [
     cost: 300,
     currency: 'gems',
     lootTableId: 'standard',
-    reward: 'Nova Crown',
-    rarity: 'SSR',
+    reward: '神秘安慰獎',
+    rarity: 'R',
     imagePath: commonChestImagePath,
     hoverImagePath: hoverChestImagePath,
     openedImagePath: openedChestImagePath,
