@@ -1,6 +1,7 @@
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { ACESFilmicToneMapping, Quaternion, SRGBColorSpace, Vector3 } from 'three';
+import { ACESFilmicToneMapping, PMREMGenerator, Quaternion, SRGBColorSpace, Vector3 } from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { chestModelPath } from '@/components/loot/chestModelConfig';
 import type { Color, Group, Material, Mesh, Object3D, Texture } from 'three';
@@ -30,9 +31,15 @@ type CoinMaterial = Material & {
   color?: Color;
   emissive?: Color;
   emissiveIntensity?: number;
+  envMap?: Texture | null;
   envMapIntensity?: number;
   metalness?: number;
   roughness?: number;
+};
+
+type ChestMaterial = CoinMaterial & {
+  clearcoat?: number;
+  clearcoatRoughness?: number;
 };
 
 type TexturedMaterial = Material & {
@@ -73,19 +80,49 @@ function tuneMaterial(material: Material, maxAnisotropy: number) {
   tuneTexture(texturedMaterial.emissiveMap, maxAnisotropy);
 }
 
-function tuneCoinMaterial(material: Material, rarity: string, maxAnisotropy: number) {
+function tuneChestMaterial(material: Material, maxAnisotropy: number) {
+  tuneMaterial(material, maxAnisotropy);
+  const chestMaterial = material as ChestMaterial;
+
+  chestMaterial.color?.set('#ffb06f');
+  chestMaterial.emissive?.set('#2b1003');
+  chestMaterial.emissiveIntensity = 0.025;
+  chestMaterial.envMapIntensity = 1.18;
+
+  if ('clearcoat' in chestMaterial) {
+    chestMaterial.clearcoat = 0.38;
+  }
+
+  if ('clearcoatRoughness' in chestMaterial) {
+    chestMaterial.clearcoatRoughness = 0.28;
+  }
+
+  chestMaterial.needsUpdate = true;
+}
+
+function tuneCoinMaterial(
+  material: Material,
+  rarity: string,
+  maxAnisotropy: number,
+  environmentMap: Texture,
+) {
   tuneMaterial(material, maxAnisotropy);
   const coinMaterial = material as CoinMaterial;
-  const glowIntensity = rarity === 'SSR' ? 0.16 : rarity === 'SR' ? 0.13 : 0.1;
+  const glowIntensity = rarity === 'SSR' ? 0.13 : rarity === 'SR' ? 0.11 : 0.09;
 
-  coinMaterial.color?.set('#ffc45a');
-  coinMaterial.emissive?.set('#6b3205');
+  coinMaterial.color?.set('#e8a11f');
+  coinMaterial.emissive?.set('#5f2802');
   coinMaterial.emissiveIntensity = glowIntensity;
 
-  coinMaterial.envMapIntensity = 1;
-  coinMaterial.roughness = 0.14;
-  coinMaterial.metalness = 0.58;
+  coinMaterial.envMap = environmentMap;
+  coinMaterial.envMapIntensity = 0.82;
+  coinMaterial.roughness = 0.18;
+  coinMaterial.metalness = 0.64;
   coinMaterial.needsUpdate = true;
+}
+
+function isChestMaterial(material: Material) {
+  return material.name.toLowerCase().includes('chest');
 }
 
 function isCoinMesh(mesh: Mesh) {
@@ -178,6 +215,16 @@ function ChestAsset({ onReady, rarity, onAnimationComplete }: ChestAssetProps) {
   const { scene } = useLoader(GLTFLoader, chestModelPath);
   const gl = useThree((state) => state.gl);
   const model = useMemo(() => scene.clone(true), [scene]);
+  const coinEnvironmentMap = useMemo(() => {
+    const pmremGenerator = new PMREMGenerator(gl);
+    const roomEnvironment = new RoomEnvironment();
+    const environmentMap = pmremGenerator.fromScene(roomEnvironment, 0.04).texture;
+
+    roomEnvironment.dispose();
+    pmremGenerator.dispose();
+
+    return environmentMap;
+  }, [gl]);
   const maxAnisotropy = useMemo(
     () => Math.min(gl.capabilities.getMaxAnisotropy(), 4),
     [gl],
@@ -188,6 +235,12 @@ function ChestAsset({ onReady, rarity, onAnimationComplete }: ChestAssetProps) {
   const elapsedRef = useRef(0);
   const hasCompletedAnimationRef = useRef(false);
 
+  useEffect(() => {
+    return () => {
+      coinEnvironmentMap.dispose();
+    };
+  }, [coinEnvironmentMap]);
+
   useLayoutEffect(() => {
     model.traverse((object) => {
       if ('isMesh' in object) {
@@ -196,17 +249,27 @@ function ChestAsset({ onReady, rarity, onAnimationComplete }: ChestAssetProps) {
         mesh.receiveShadow = true;
 
         const material = mesh.material;
-        if (Array.isArray(material)) {
-          material.forEach((item) => tuneMaterial(item, maxAnisotropy));
-        } else if (material) {
-          tuneMaterial(material, maxAnisotropy);
-        }
+        const materials = Array.isArray(material) ? material : [material];
+        materials.forEach((item) => {
+          if (!item) {
+            return;
+          }
+
+          if (isChestMaterial(item)) {
+            tuneChestMaterial(item, maxAnisotropy);
+            return;
+          }
+
+          tuneMaterial(item, maxAnisotropy);
+        });
 
         if (isCoinMesh(mesh)) {
           if (Array.isArray(material)) {
-            material.forEach((item) => tuneCoinMaterial(item, rarity, maxAnisotropy));
+            material.forEach((item) =>
+              tuneCoinMaterial(item, rarity, maxAnisotropy, coinEnvironmentMap),
+            );
           } else if (material) {
-            tuneCoinMaterial(material, rarity, maxAnisotropy);
+            tuneCoinMaterial(material, rarity, maxAnisotropy, coinEnvironmentMap);
           }
         }
       }
@@ -216,7 +279,7 @@ function ChestAsset({ onReady, rarity, onAnimationComplete }: ChestAssetProps) {
     lidRef.current = lid ?? null;
     lidClosedQuaternionRef.current = lid ? lid.quaternion.clone() : null;
     onReady?.();
-  }, [maxAnisotropy, model, onReady, rarity]);
+  }, [coinEnvironmentMap, maxAnisotropy, model, onReady, rarity]);
 
   useFrame((state: RootState, delta) => {
     if (hasCompletedAnimationRef.current) {
@@ -297,13 +360,14 @@ export function ChestModel({ onReady, rarity }: ChestModelProps) {
       style={{ width: '100%', height: '100%', background: 'transparent' }}
     >
       <CanvasResolutionController dpr={dpr} />
-      <ambientLight color="#ead9ca" intensity={0.38} />
-      <hemisphereLight color="#fff3df" groundColor="#241511" intensity={0.58} />
-      <directionalLight color="#fff0cc" position={[-1.8, 2.4, 2.8]} intensity={2.85} />
-      <directionalLight color="#f1c08a" position={[1.4, 1.1, 2.2]} intensity={0.92} />
-      <directionalLight color="#d7ddff" position={[2.8, 1.6, -2.6]} intensity={0.52} />
-      <pointLight color="#fff1cf" position={[0.08, 0.38, 1.7]} intensity={0.58} distance={3.4} />
-      <pointLight color="#ffc15c" position={[0.18, 0.72, 1.15]} intensity={0.78} distance={1.55} />
+      <ambientLight color="#ead2bd" intensity={0.32} />
+      <hemisphereLight color="#fff0d8" groundColor="#2c140c" intensity={0.52} />
+      <directionalLight color="#ffe1ad" position={[-1.8, 2.4, 2.8]} intensity={2.7} />
+      <directionalLight color="#d18443" position={[1.4, 1.1, 2.2]} intensity={0.72} />
+      <directionalLight color="#c9d2ff" position={[2.8, 1.6, -2.6]} intensity={0.38} />
+      <pointLight color="#fff0bd" position={[0.08, 0.38, 1.7]} intensity={0.52} distance={3.4} />
+      <pointLight color="#ffc04a" position={[0.1, 0.68, 0.95]} intensity={1.35} distance={1.45} />
+      <pointLight color="#ff9f1f" position={[0.05, 0.42, 0.62]} intensity={0.82} distance={0.92} />
       <Suspense fallback={null}>
         <ChestAsset
           onReady={onReady}
