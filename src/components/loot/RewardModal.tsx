@@ -35,13 +35,9 @@ export function RewardModal() {
   const claimReward = useLootBoxStore((state) => state.claimReward);
   const selectedChest = chests.find((chest) => chest.id === selectedChestId);
   const [isChestModelReady, setIsChestModelReady] = useState(false);
-  const [hasChestModelError, setHasChestModelError] = useState(false);
-  const fallbackChestImage =
-    selectedChest?.openedImagePath ?? selectedChest?.hoverImagePath ?? selectedChest?.imagePath;
 
   useEffect(() => {
     setIsChestModelReady(false);
-    setHasChestModelError(false);
   }, [revealedReward?.id]);
 
   return (
@@ -76,32 +72,20 @@ export function RewardModal() {
                 <RewardEffects />
 
                 <div className="relative z-10 h-full w-full">
-                  {fallbackChestImage ? (
-                    <motion.img
-                      src={fallbackChestImage}
-                      alt={`Chest ${selectedChest.id}`}
-                      className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_18px_28px_rgba(0,0,0,0.42)]"
-                      animate={{ opacity: isChestModelReady && !hasChestModelError ? 0 : 1 }}
-                      transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
-                    />
-                  ) : null}
-
                   <motion.div
                     className="absolute inset-0"
-                    animate={{ opacity: isChestModelReady && !hasChestModelError ? 1 : 0 }}
+                    animate={{ opacity: isChestModelReady ? 1 : 0 }}
                     transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                   >
                     <ChestModelErrorBoundary
                       key={revealedReward.id}
                       onModelError={() => {
                         setIsChestModelReady(false);
-                        setHasChestModelError(true);
                       }}
                     >
                       <Suspense fallback={null}>
                         <LazyChestModel
                           onReady={() => {
-                            setHasChestModelError(false);
                             setIsChestModelReady(true);
                           }}
                           rarity={revealedReward.rarity}
