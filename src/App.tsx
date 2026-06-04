@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChestCard } from '@/components/loot/ChestCard';
 import { preloadChestModel } from '@/components/loot/lazyChestModel';
@@ -6,7 +6,21 @@ import { RewardModal } from '@/components/loot/RewardModal';
 import { chests } from '@/data/chests';
 import { useLootBoxStore } from '@/store/lootBoxStore';
 
+const loadingMinDuration = 700;
+const loadingMaxDuration = 2800;
+
+function preloadImage(src: string) {
+  return new Promise<void>((resolve, reject) => {
+    const image = new Image();
+
+    image.onload = () => resolve();
+    image.onerror = () => reject(new Error(`Failed to preload image: ${src}`));
+    image.src = src;
+  });
+}
+
 export function App() {
+  const [isAppReady, setIsAppReady] = useState(false);
   const selectedChestId = useLootBoxStore((state) => state.selectedChestId);
   const gems = useLootBoxStore((state) => state.gems);
   const freeOpenCount = useLootBoxStore((state) => state.freeOpenCount);
@@ -14,24 +28,95 @@ export function App() {
   const nextMilestone = useLootBoxStore((state) => state.nextMilestone);
   const progressTarget = nextMilestone?.opensRequired ?? Math.max(openedCount, 1);
   const progressValue = Math.min((openedCount / progressTarget) * 100, 100);
+  const preloadImagePaths = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          chests.flatMap((chest) =>
+            [chest.imagePath, chest.hoverImagePath, chest.openedImagePath].filter(Boolean),
+          ),
+        ),
+      ) as string[],
+    [],
+  );
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      void preloadChestModel();
-    }, 650);
+    let isMounted = true;
+    const minimumLoading = new Promise<void>((resolve) => {
+      window.setTimeout(resolve, loadingMinDuration);
+    });
+    const maximumLoading = new Promise<'timeout'>((resolve) => {
+      window.setTimeout(() => resolve('timeout'), loadingMaxDuration);
+    });
+    const preloadResources = Promise.allSettled([
+      preloadChestModel(),
+      ...preloadImagePaths.map((src) => preloadImage(src)),
+    ]);
+
+    Promise.all([minimumLoading, Promise.race([preloadResources, maximumLoading])]).then(() => {
+      if (isMounted) {
+        setIsAppReady(true);
+      }
+    });
 
     return () => {
-      window.clearTimeout(timeoutId);
+      isMounted = false;
     };
-  }, []);
+  }, [preloadImagePaths]);
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#080706] text-[#f0e3cf]">
+      {!isAppReady ? (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-[#080706]"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(217,146,55,0.22),transparent_34%),radial-gradient(circle_at_50%_78%,rgba(114,55,26,0.22),transparent_42%),linear-gradient(180deg,#130d0b_0%,#080706_68%,#030202_100%)]" />
+          <motion.div
+            className="pointer-events-none absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#d8a24f]/24"
+            animate={{ scale: [0.82, 1.08, 0.82], opacity: [0.18, 0.42, 0.18] }}
+            transition={{ duration: 1.55, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.div
+            className="relative flex flex-col items-center"
+            initial={{ opacity: 0, y: 16, scale: 0.94 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <motion.img
+              src={chests[0]?.imagePath}
+              alt=""
+              className="h-32 w-32 object-contain drop-shadow-[0_22px_30px_rgba(0,0,0,0.48)]"
+              animate={{ y: [-4, 5, -4], rotate: [-1.5, 1.5, -1.5] }}
+              transition={{ duration: 1.7, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.div
+              className="mt-4 h-1.5 w-40 overflow-hidden rounded-full border border-[#9b5727]/48 bg-[#1a100c]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.18 }}
+            >
+              <motion.div
+                className="h-full w-2/5 rounded-full bg-[linear-gradient(90deg,#9b5727,#f0c276,#9b5727)] shadow-[0_0_16px_rgba(240,194,118,0.52)]"
+                animate={{ x: ['-120%', '260%'] }}
+                transition={{ duration: 1.05, repeat: Infinity, ease: [0.65, 0, 0.35, 1] }}
+              />
+            </motion.div>
+            <p className="mt-5 text-[11px] font-black uppercase tracking-[0.28em] text-[#d8a24f]/78">
+              Loot Vault
+            </p>
+          </motion.div>
+        </motion.div>
+      ) : null}
+
       <motion.section
         className="relative mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-6 pt-5 sm:max-w-lg"
+        initial={{ opacity: 0 }}
         animate={{
           filter: selectedChestId ? 'blur(12px)' : 'blur(0px)',
           scale: selectedChestId ? 0.96 : 1,
+          opacity: isAppReady ? 1 : 0,
         }}
         transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       >
