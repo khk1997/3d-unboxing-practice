@@ -35,7 +35,7 @@ function reloadOnceForFreshChunks(error: unknown) {
 export function preloadChestModel() {
   chestModelModulePromise ??= Promise.all([
     import('@/components/loot/preloadChestModelAssets').then((module) => {
-      module.preloadChestModelAssets();
+      return module.preloadChestModelAssets();
     }),
     import('@/components/loot/ChestModel'),
   ])

@@ -16,20 +16,9 @@ export function App() {
   const progressValue = Math.min((openedCount / progressTarget) * 100, 100);
 
   useEffect(() => {
-    const warmChestModel = () => {
+    const timeoutId = window.setTimeout(() => {
       void preloadChestModel();
-    };
-    const requestIdle = window.requestIdleCallback;
-
-    if (requestIdle) {
-      const idleId = requestIdle(warmChestModel, { timeout: 2500 });
-
-      return () => {
-        window.cancelIdleCallback(idleId);
-      };
-    }
-
-    const timeoutId = window.setTimeout(warmChestModel, 1400);
+    }, 650);
 
     return () => {
       window.clearTimeout(timeoutId);
