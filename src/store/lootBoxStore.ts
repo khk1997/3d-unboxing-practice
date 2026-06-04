@@ -332,7 +332,7 @@ export const useLootBoxStore = create<LootBoxState>((set, get) => ({
         selectedChestId: null,
         revealedReward: null,
         openedChestIds: shouldResetBoard ? [] : state.openedChestIds,
-        gems: shouldResetBoard ? Math.max(state.gems, initialGems) : state.gems,
+        gems: state.gems,
         freeOpenCount: shouldResetBoard
           ? Math.min(Math.max(state.freeOpenCount, initialFreeOpenCount), maxFreeOpenCount)
           : state.freeOpenCount,
