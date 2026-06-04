@@ -1,9 +1,33 @@
-import { Suspense, useEffect, useState } from 'react';
+import { Component, Suspense, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LazyChestModel } from '@/components/loot/lazyChestModel';
 import { RewardEffects } from '@/components/loot/RewardEffects';
 import { chests } from '@/data/chests';
 import { useLootBoxStore } from '@/store/lootBoxStore';
+import type { ErrorInfo, ReactNode } from 'react';
+
+class ChestModelErrorBoundary extends Component<
+  { children: ReactNode; onModelError: () => void },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {
+    this.props.onModelError();
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null;
+    }
+
+    return this.props.children;
+  }
+}
 
 export function RewardModal() {
   const selectedChestId = useLootBoxStore((state) => state.selectedChestId);
@@ -53,12 +77,14 @@ export function RewardModal() {
                     animate={{ opacity: isChestModelReady ? 1 : 0 }}
                     transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                   >
-                    <Suspense fallback={null}>
-                      <LazyChestModel
-                        onReady={() => setIsChestModelReady(true)}
-                        rarity={revealedReward.rarity}
-                      />
-                    </Suspense>
+                    <ChestModelErrorBoundary onModelError={() => setIsChestModelReady(false)}>
+                      <Suspense fallback={null}>
+                        <LazyChestModel
+                          onReady={() => setIsChestModelReady(true)}
+                          rarity={revealedReward.rarity}
+                        />
+                      </Suspense>
+                    </ChestModelErrorBoundary>
                   </motion.div>
                 </div>
               </motion.div>
