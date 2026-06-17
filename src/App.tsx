@@ -9,6 +9,20 @@ import type { Reward } from '@/data/chests';
 
 const loadingMinDuration = 700;
 const loadingMaxDuration = 2800;
+const rewardWebpImagePaths = [
+  `${import.meta.env.BASE_URL}images/chest_sparkle_ray/chest_sparkles.webp`,
+  `${import.meta.env.BASE_URL}images/chest_sparkle_ray/ray.webp`,
+];
+
+export type OpeningMode = 'webp' | 'three';
+
+function getInitialOpeningMode(): OpeningMode {
+  if (typeof window === 'undefined') {
+    return 'three';
+  }
+
+  return new URLSearchParams(window.location.search).get('mode') === 'webp' ? 'webp' : 'three';
+}
 
 function preloadImage(src: string) {
   return new Promise<void>((resolve, reject) => {
@@ -18,6 +32,13 @@ function preloadImage(src: string) {
     image.onerror = () => reject(new Error(`Failed to preload image: ${src}`));
     image.src = src;
   });
+}
+
+function updateModeQuery(mode: OpeningMode) {
+  const url = new URL(window.location.href);
+
+  url.searchParams.set('mode', mode);
+  window.history.replaceState(null, '', url);
 }
 
 const rarityStyles: Record<Reward['rarity'], { label: string; text: string; badge: string }> = {
@@ -40,12 +61,12 @@ const rarityStyles: Record<Reward['rarity'], { label: string; text: string; badg
 
 export function App() {
   const [isAppReady, setIsAppReady] = useState(false);
+  const [openingMode, setOpeningMode] = useState<OpeningMode>(getInitialOpeningMode);
   const selectedChestId = useLootBoxStore((state) => state.selectedChestId);
   const gems = useLootBoxStore((state) => state.gems);
   const freeOpenCount = useLootBoxStore((state) => state.freeOpenCount);
   const discountOpenCount = useLootBoxStore((state) => state.discountOpenCount);
   const sleepingOpenCount = useLootBoxStore((state) => state.sleepingOpenCount);
-  const openedCount = useLootBoxStore((state) => state.openedCount);
   const rewardHistory = useLootBoxStore((state) => state.rewardHistory);
   const ssrRate = useLootBoxStore((state) => state.ssrRate);
   const pendingSsrRate = useLootBoxStore((state) => state.pendingSsrRate);
@@ -73,12 +94,15 @@ export function App() {
     () =>
       Array.from(
         new Set(
-          chests.flatMap((chest) =>
-            [chest.imagePath, chest.hoverImagePath, chest.openedImagePath].filter(Boolean),
-          ),
+          [
+            ...chests.flatMap((chest) =>
+              [chest.imagePath, chest.hoverImagePath, chest.openedImagePath].filter(Boolean),
+            ),
+            ...(openingMode === 'webp' ? rewardWebpImagePaths : []),
+          ],
         ),
       ) as string[],
-    [],
+    [openingMode],
   );
 
   useEffect(() => {
@@ -90,7 +114,7 @@ export function App() {
       window.setTimeout(() => resolve('timeout'), loadingMaxDuration);
     });
     const preloadResources = Promise.allSettled([
-      preloadChestModel(),
+      ...(openingMode === 'three' ? [preloadChestModel()] : []),
       ...preloadImagePaths.map((src) => preloadImage(src)),
     ]);
 
@@ -103,7 +127,7 @@ export function App() {
     return () => {
       isMounted = false;
     };
-  }, [preloadImagePaths]);
+  }, [openingMode, preloadImagePaths]);
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#080706] text-[#f0e3cf]">
@@ -173,9 +197,34 @@ export function App() {
               開箱金庫
             </h1>
           </div>
-          <div className="rounded-full border border-[rgba(111,74,47,0.56)] bg-[#100b09]/58 px-3 py-2 text-right shadow-lg shadow-black/20 backdrop-blur">
-            <p className="text-[10px] uppercase tracking-[0.18em] text-[#c0a17a]/58">寶石</p>
-            <p className="text-sm font-extrabold text-[#e5bf7a]">{gems.toLocaleString()}</p>
+          <div className="flex shrink-0 flex-col items-end gap-2">
+            <div
+              className="grid grid-cols-2 rounded-full border border-[rgba(111,74,47,0.6)] bg-[#100b09]/66 p-1 shadow-lg shadow-black/20 backdrop-blur"
+              aria-label="切換開獎模式"
+            >
+              {(['webp', 'three'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => {
+                    setOpeningMode(mode);
+                    updateModeQuery(mode);
+                  }}
+                  className={`min-h-8 rounded-full px-3 text-[10px] font-black uppercase tracking-[0.12em] transition focus:outline-none focus:ring-2 focus:ring-[#c99b67]/70 ${
+                    openingMode === mode
+                      ? 'bg-[linear-gradient(180deg,#d8a24f_0%,#9b5727_100%)] text-[#241309] shadow-[inset_0_1px_0_rgba(255,226,170,0.36),0_8px_18px_rgba(0,0,0,0.22)]'
+                      : 'text-[#d8c1a0]/62 hover:text-[#f1ddbd]'
+                  }`}
+                  aria-pressed={openingMode === mode}
+                >
+                  {mode === 'webp' ? 'webp' : 'three.js'}
+                </button>
+              ))}
+            </div>
+            <div className="rounded-full border border-[rgba(111,74,47,0.56)] bg-[#100b09]/58 px-3 py-2 text-right shadow-lg shadow-black/20 backdrop-blur">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-[#c0a17a]/58">寶石</p>
+              <p className="text-sm font-extrabold text-[#e5bf7a]">{gems.toLocaleString()}</p>
+            </div>
           </div>
         </motion.div>
 
@@ -210,7 +259,12 @@ export function App() {
 
           <div className="grid grid-cols-3 gap-3">
             {chests.map((chest, index) => (
-              <ChestCard key={chest.id} chest={chest} index={index} />
+              <ChestCard
+                key={chest.id}
+                chest={chest}
+                index={index}
+                usesThreeJsReward={openingMode === 'three'}
+              />
             ))}
           </div>
 
@@ -361,7 +415,7 @@ export function App() {
         </motion.div>
       </motion.section>
 
-      <RewardModal />
+      <RewardModal openingMode={openingMode} />
     </main>
   );
 }

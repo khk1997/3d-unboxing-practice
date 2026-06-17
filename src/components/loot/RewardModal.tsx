@@ -4,7 +4,12 @@ import { LazyChestModel } from '@/components/loot/lazyChestModel';
 import { RewardEffects } from '@/components/loot/RewardEffects';
 import { chests } from '@/data/chests';
 import { useLootBoxStore } from '@/store/lootBoxStore';
-import type { ErrorInfo, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+
+type OpeningMode = 'webp' | 'three';
+
+const rewardRayImagePath = `${import.meta.env.BASE_URL}images/chest_sparkle_ray/ray.webp`;
+const rewardSparkleChestImagePath = `${import.meta.env.BASE_URL}images/chest_sparkle_ray/chest_sparkles.webp`;
 
 const rewardDescriptions: Record<string, string> = {
   'air-gift-pack': '沒有任何效果，但你獲得了滿滿的空氣。',
@@ -28,7 +33,7 @@ class ChestModelErrorBoundary extends Component<
     return { hasError: true };
   }
 
-  componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {
+  componentDidCatch() {
     this.props.onModelError();
   }
 
@@ -41,7 +46,57 @@ class ChestModelErrorBoundary extends Component<
   }
 }
 
-export function RewardModal() {
+function RewardWebpReveal() {
+  return (
+    <motion.div
+      className="relative mx-auto mt-5 h-[clamp(15rem,38vw,18rem)] w-[clamp(15rem,38vw,18rem)]"
+      initial={{ scale: 0.68, y: 12 }}
+      animate={{ scale: 1, y: 0 }}
+      transition={{ type: 'spring', stiffness: 210, damping: 17, delay: 0.05 }}
+      aria-hidden="true"
+    >
+      <motion.div
+        className="pointer-events-none absolute left-[-39%] top-[-32%] z-0 h-[178%] w-[178%] opacity-90"
+        initial={{ opacity: 0, scale: 0.72, rotate: -12 }}
+        animate={{ opacity: 0.92, scale: 1, rotate: 0 }}
+        transition={{ duration: 0.62, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <img
+          src={rewardRayImagePath}
+          alt=""
+          draggable={false}
+          className="reward-rays-spin h-full w-full select-none object-contain"
+        />
+      </motion.div>
+      <motion.div
+        className="pointer-events-none absolute left-[-2%] top-[4%] z-10 h-[104%] w-[104%] rounded-full bg-[#ffd06a]/22 blur-3xl"
+        initial={{ opacity: 0, scale: 0.62 }}
+        animate={{ opacity: [0.42, 0.72, 0.5], scale: [0.86, 1.04, 0.96] }}
+        transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.img
+        src={rewardSparkleChestImagePath}
+        alt=""
+        draggable={false}
+        className="pointer-events-none absolute left-[-1%] top-[1%] z-20 h-[94%] w-[94%] select-none object-contain drop-shadow-[0_26px_28px_rgba(0,0,0,0.46)]"
+        initial={{ opacity: 0, y: 18, scale: 0.78 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{
+          opacity: { duration: 0.3, delay: 0.14 },
+          y: { type: 'spring', stiffness: 260, damping: 18, delay: 0.14 },
+          scale: { type: 'spring', stiffness: 260, damping: 15, delay: 0.14 },
+        }}
+      />
+      <div className="pointer-events-none absolute left-[18%] bottom-[8%] z-10 h-[13%] w-[58%] rounded-full bg-black/38 blur-xl" />
+    </motion.div>
+  );
+}
+
+type RewardModalProps = {
+  openingMode: OpeningMode;
+};
+
+export function RewardModal({ openingMode }: RewardModalProps) {
   const selectedChestId = useLootBoxStore((state) => state.selectedChestId);
   const openingState = useLootBoxStore((state) => state.openingState);
   const revealedReward = useLootBoxStore((state) => state.revealedReward);
@@ -106,38 +161,42 @@ export function RewardModal() {
                 獎項解鎖
               </p>
 
-              <motion.div
-                className="relative mx-auto mt-5 h-[clamp(15rem,38vw,18rem)] w-[clamp(15rem,38vw,18rem)] [&_canvas]:!h-full [&_canvas]:!w-full"
-                initial={{ rotate: -8, scale: 0.5 }}
-                animate={{ rotate: 0, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 210, damping: 14, delay: 0.1 }}
-              >
-                <RewardEffects />
+              {openingMode === 'webp' ? (
+                <RewardWebpReveal />
+              ) : (
+                <motion.div
+                  className="relative mx-auto mt-5 h-[clamp(15rem,38vw,18rem)] w-[clamp(15rem,38vw,18rem)] [&_canvas]:!h-full [&_canvas]:!w-full"
+                  initial={{ rotate: -8, scale: 0.5 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 210, damping: 14, delay: 0.1 }}
+                >
+                  <RewardEffects />
 
-                <div className="relative z-10 h-full w-full">
-                  <motion.div
-                    className="absolute inset-0"
-                    animate={{ opacity: isChestModelReady ? 1 : 0 }}
-                    transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    <ChestModelErrorBoundary
-                      key={revealedReward.id}
-                      onModelError={() => {
-                        setIsChestModelReady(false);
-                      }}
+                  <div className="relative z-10 h-full w-full">
+                    <motion.div
+                      className="absolute inset-0"
+                      animate={{ opacity: isChestModelReady ? 1 : 0 }}
+                      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                     >
-                      <Suspense fallback={null}>
-                        <LazyChestModel
-                          onReady={() => {
-                            setIsChestModelReady(true);
-                          }}
-                          rarity={revealedReward.rarity}
-                        />
-                      </Suspense>
-                    </ChestModelErrorBoundary>
-                  </motion.div>
-                </div>
-              </motion.div>
+                      <ChestModelErrorBoundary
+                        key={revealedReward.id}
+                        onModelError={() => {
+                          setIsChestModelReady(false);
+                        }}
+                      >
+                        <Suspense fallback={null}>
+                          <LazyChestModel
+                            onReady={() => {
+                              setIsChestModelReady(true);
+                            }}
+                            rarity={revealedReward.rarity}
+                          />
+                        </Suspense>
+                      </ChestModelErrorBoundary>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              )}
 
               <h2 className="mt-5 break-words font-display text-[clamp(2rem,9vw,2.5rem)] leading-tight text-[#f1ddbd] drop-shadow-[0_2px_18px_rgba(176,105,42,0.2)]">
                 {revealedReward.name}

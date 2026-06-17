@@ -7,9 +7,10 @@ import { useLootBoxStore } from '@/store/lootBoxStore';
 type ChestCardProps = {
   chest: Chest;
   index: number;
+  usesThreeJsReward: boolean;
 };
 
-export function ChestCard({ chest, index }: ChestCardProps) {
+export function ChestCard({ chest, index, usesThreeJsReward }: ChestCardProps) {
   const openChest = useLootBoxStore((state) => state.openChest);
   const canOpenChest = useLootBoxStore((state) => state.canOpenChest);
   const openedChestIds = useLootBoxStore((state) => state.openedChestIds);
@@ -48,7 +49,7 @@ export function ChestCard({ chest, index }: ChestCardProps) {
   };
 
   const warmRewardModel = () => {
-    if (isOpenable) {
+    if (isOpenable && usesThreeJsReward) {
       void preloadChestModel();
     }
   };
