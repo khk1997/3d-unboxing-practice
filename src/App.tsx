@@ -11,7 +11,6 @@ const loadingMinDuration = 700;
 const loadingMaxDuration = 2800;
 const rewardWebpImagePaths = [
   `${import.meta.env.BASE_URL}images/chest_sparkle_ray/chest_sparkles.webp`,
-  `${import.meta.env.BASE_URL}images/chest_sparkle_ray/ray.webp`,
 ];
 
 export type OpeningMode = 'webp' | 'three';

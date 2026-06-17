@@ -8,7 +8,6 @@ import type { ReactNode } from 'react';
 
 type OpeningMode = 'webp' | 'three';
 
-const rewardRayImagePath = `${import.meta.env.BASE_URL}images/chest_sparkle_ray/ray.webp`;
 const rewardSparkleChestImagePath = `${import.meta.env.BASE_URL}images/chest_sparkle_ray/chest_sparkles.webp`;
 
 const rewardDescriptions: Record<string, string> = {
@@ -55,30 +54,13 @@ function RewardWebpReveal() {
       transition={{ type: 'spring', stiffness: 210, damping: 17, delay: 0.05 }}
       aria-hidden="true"
     >
-      <motion.div
-        className="pointer-events-none absolute left-[-39%] top-[-32%] z-0 h-[178%] w-[178%] opacity-90"
-        initial={{ opacity: 0, scale: 0.72, rotate: -12 }}
-        animate={{ opacity: 0.92, scale: 1, rotate: 0 }}
-        transition={{ duration: 0.62, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <img
-          src={rewardRayImagePath}
-          alt=""
-          draggable={false}
-          className="reward-rays-spin h-full w-full select-none object-contain"
-        />
-      </motion.div>
-      <motion.div
-        className="pointer-events-none absolute left-[-2%] top-[4%] z-10 h-[104%] w-[104%] rounded-full bg-[#ffd06a]/22 blur-3xl"
-        initial={{ opacity: 0, scale: 0.62 }}
-        animate={{ opacity: [0.42, 0.72, 0.5], scale: [0.86, 1.04, 0.96] }}
-        transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-      />
+      <RewardEffects />
+
       <motion.img
         src={rewardSparkleChestImagePath}
         alt=""
         draggable={false}
-        className="pointer-events-none absolute left-[-1%] top-[1%] z-20 h-[94%] w-[94%] select-none object-contain drop-shadow-[0_26px_28px_rgba(0,0,0,0.46)]"
+        className="pointer-events-none absolute left-[-1%] top-[1%] z-10 h-[94%] w-[94%] select-none object-contain drop-shadow-[0_26px_28px_rgba(0,0,0,0.46)]"
         initial={{ opacity: 0, y: 18, scale: 0.78 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{
@@ -87,7 +69,6 @@ function RewardWebpReveal() {
           scale: { type: 'spring', stiffness: 260, damping: 15, delay: 0.14 },
         }}
       />
-      <div className="pointer-events-none absolute left-[18%] bottom-[8%] z-10 h-[13%] w-[58%] rounded-full bg-black/38 blur-xl" />
     </motion.div>
   );
 }
