@@ -131,6 +131,27 @@ function isCoinMesh(mesh: Mesh) {
   );
 }
 
+function findChestLid(model: Object3D) {
+  const namedLid =
+    model.getObjectByName('Chest_Lid') ??
+    model.getObjectByName('Chest_Lid_lp') ??
+    model.getObjectByName('chest_lid_lp') ??
+    null;
+
+  if (namedLid) {
+    return namedLid;
+  }
+
+  let lid: Object3D | null = null;
+  model.traverse((object) => {
+    if (!lid && object.name.toLowerCase().includes('lid')) {
+      lid = object;
+    }
+  });
+
+  return lid;
+}
+
 function easeOutCubic(value: number) {
   return 1 - Math.pow(1 - value, 3);
 }
@@ -255,7 +276,7 @@ function ChestAsset({ onReady, rarity, onAnimationComplete }: ChestAssetProps) {
       }
     });
 
-    const lid = model.getObjectByName('Chest_Lid');
+    const lid = findChestLid(model);
     lidRef.current = lid ?? null;
     lidClosedQuaternionRef.current = lid ? lid.quaternion.clone() : null;
     onReady?.();
