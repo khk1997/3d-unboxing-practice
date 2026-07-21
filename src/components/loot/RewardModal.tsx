@@ -8,7 +8,7 @@ import type { ReactNode } from 'react';
 
 type OpeningMode = 'webp' | 'three';
 
-const rewardSparkleChestImagePath = `${import.meta.env.BASE_URL}images/chest_sparkle_ray/chest_sparkles.webp`;
+const rewardSparkleChestImagePath = `${import.meta.env.BASE_URL}images/chest_sparkle_ray/open_chest.webp`;
 
 const rewardDescriptions: Record<string, string> = {
   'air-gift-pack': '沒有任何效果，但你獲得了滿滿的空氣。',
