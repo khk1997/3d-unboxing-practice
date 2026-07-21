@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChestCard } from '@/components/loot/ChestCard';
 import { preloadChestModel } from '@/components/loot/lazyChestModel';
@@ -6,6 +6,12 @@ import { RewardModal } from '@/components/loot/RewardModal';
 import { chests } from '@/data/chests';
 import { useLootBoxStore } from '@/store/lootBoxStore';
 import type { Reward } from '@/data/chests';
+
+const LazyChestAnimationExport = lazy(() =>
+  import('@/components/loot/ChestAnimationExport').then((module) => ({
+    default: module.ChestAnimationExport,
+  })),
+);
 
 const loadingMinDuration = 700;
 const loadingMaxDuration = 2800;
@@ -73,6 +79,9 @@ export function App() {
   const ssrPityTarget = useLootBoxStore((state) => state.ssrPityTarget);
   const latestReward = rewardHistory[0];
   const previousRewards = rewardHistory.slice(1, 7);
+  const isAnimationExport =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('export') === 'chest-animation';
   const pullsUntilSsrPity = Math.max(ssrPityTarget - 1 - pullsSinceSsr, 0);
   const accumulatedPityChange = useMemo(() => {
     let bonus = 0;
@@ -127,6 +136,14 @@ export function App() {
       isMounted = false;
     };
   }, [openingMode, preloadImagePaths]);
+
+  if (isAnimationExport) {
+    return (
+      <Suspense fallback={null}>
+        <LazyChestAnimationExport />
+      </Suspense>
+    );
+  }
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#080706] text-[#f0e3cf]">
